@@ -2,9 +2,11 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
 
-Dates are placeholder gates until you set a start date. Each milestone maps to WBS phases in [03-WBS.md](03-WBS.md) and done-criteria in [06-Acceptance-Criteria.md](06-Acceptance-Criteria.md).
+Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
+
+Shipping target is November 3, 2026; intermediate dates and the testing window remain open. Each milestone maps to WBS phases in [03-WBS.md](03-WBS.md) and done-criteria in [06-Acceptance-Criteria.md](06-Acceptance-Criteria.md).
 
 ## Milestone M0 — Foundations locked
 - WBS: Phase 0
@@ -27,19 +29,19 @@ Dates are placeholder gates until you set a start date. Each milestone maps to W
 - Web app supports semantic search + AI summaries with clickable citations.
 - **Definition of done:** a first-time user can issue a search and read a citation-backed summary end-to-end.
 
-## Milestone M4 — Stance Tracker live
+## Milestone M4 — Stance Tracker (deferred)
 - WBS: Phase 5
 - Pro/Con dashboard renders entity stances with evidence drilldown for at least one test issue.
 - **Definition of done:** non-technical reviewer can answer "where does X stand on Y?" with visible support.
 
-## Milestone M5 — Action Tracer live
+## Milestone M5 — Action Tracer (deferred)
 - WBS: Phase 6
 - Precedent/regulatory timeline renders for a test issue with event + document links.
 - **Definition of done:** timeline shows evolution of a policy/court/regulatory thread with sources.
 
 ## Milestone M6 — User-testing-ready (release gate)
-- WBS: Phases 7–8, all upstream
-- Free access for tester cohort; all three capabilities usable; time-saved analytics recording.
+- WBS: Phases 7–8, synthesis upstream milestones; excludes deferred M4–M5
+- Free access for tester cohort; search and synthesis usable; time-saved analytics recording.
 - **Definition of done:** full acceptance run passes (06), deploy live for cohort.
 
 ## Milestone M7 — Cohort validation complete

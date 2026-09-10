@@ -11,7 +11,7 @@ APEX (**Applied Policy & Evidence Exchange**) is an AI-powered B2B/B2G SaaS that
 | Layer | Technology |
 |---|---|
 | **API** | Hono + TypeScript on Cloudflare Workers |
-| **Frontend** | Next.js/React SPA (Vite-compatible) + Tailwind + shadcn/ui + React Query + Recharts |
+| **Frontend** | Vite + React + Tailwind + shadcn/ui + React Query + Recharts |
 | **Database** | Cloudflare D1 (SQLite, relational, tenant-scoped) |
 | **Vectors** | Cloudflare Vectorize (embeddings stored via Workers AI `bge-m3`) |
 | **Storage** | Cloudflare R2 (raw PDFs, full text) |
@@ -22,19 +22,19 @@ APEX (**Applied Policy & Evidence Exchange**) is an AI-powered B2B/B2G SaaS that
 | **Auth** | Single Hono middleware wrapper (email/password or magic link MVP) |
 | **Hosting** | Cloudflare (Workers, Pages, D1, Vectorize, R2, Workers AI, AI Gateway) |
 
-Full rationale: `07-Architecture.md` §6 decision register.
+Decision history and rationale: `docs/decisions/README.md`. Current technical specification: `07-Architecture.md`.
 
 ## Monorepo layout
 
 ```
 APEX/
 ├── apps/
-│   ├── web/          # Frontend (Next.js/React)
+│   ├── web/          # Frontend (Vite + React)
 │   └── api/          # API Worker (Hono/TS)
 ├── packages/         # Shared types, citation schema, utils
 ├── pipeline/         # Python ingestion/normalization scripts (optional, CI/local)
 ├── scripts/          # Build, seed, dev scripts
-├── docs/             # Planning docs (the 01–08 files below)
+├── docs/             # Decision log (01–08 planning docs remain at repo root)
 └── wrangler.jsonc    # Cloudflare Worker config
 ```
 
@@ -55,7 +55,7 @@ APEX/
 
 1. **Tenant scoping:** every user-created row carries `user_id` / `organization_id`; all queries scoped by tenant.
 2. **No LLM keys in browser:** all model calls proxied server-side via Workers → AI Gateway.
-3. **Citation verification mandatory:** post-generation pass checks every cited span resolves to a real source; unverified claims are withheld.
+3. **Citation verification mandatory:** post-generation checks verify citation integrity and that the source supports the claim; unverified claims are withheld.
 4. **Auth middleware wrapper:** single module; SSO/enterprise swap = one-file change.
 
 ## AI/RAG pipeline
@@ -63,7 +63,7 @@ APEX/
 ```
 Query → retrieve (Vectorize hybrid) → inject spans as context
       → generate (Claude via AI Gateway) with citation anchors
-      → verify: every emitted citation resolves to a fetched span
+      → verify: citation resolves to a fetched span AND supports its claim
       → unverified claims DROPPED
       → render to UI: [n] → span text → source URL
 ```
@@ -82,12 +82,13 @@ Query → retrieve (Vectorize hybrid) → inject spans as context
 ## Open decisions (still TBD)
 
 - Concrete model IDs + which Anthropic key (Q2 partial)
-- Monthly AI cost ceiling number for AI Gateway spend limits (Q3)
+- AI-only allocation and enforcement within the approved $100/month total operating allowance (Q3)
 - Auth method: email/password vs magic link
 - ORM: Drizzle vs typed raw SQL (build-phase pick)
 
 ## Conventions to follow
 
+- **Decision logging:** whenever a build decision is made, add a dated entry to `docs/decisions/README.md` with status, decision, rationale, alternatives/tradeoffs, and affected docs. Distinguish approved decisions from proposals and open questions; reconcile affected planning docs in the same change.
 - **pnpm workspaces** (match `cloudflare-os` conventions)
 - **TypeScript** everywhere in `apps/` and `packages/`; Python only in `pipeline/`
 - **No secrets in code** — `.env.example` only; production keys via `wrangler secret put`

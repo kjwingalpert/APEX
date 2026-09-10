@@ -2,7 +2,9 @@
 
 Status: Draft — candidate set confirmed by owner; licensing review pending (Phase 1, WBS 1.2)
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
+
+Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 Ref: Architecture §1 (07), Risks Q1 (05)
 
 > **Security note:** one API key (PolicyNote) was pasted during a planning session. It is **not** stored in any project file. Rotate that key, and store all keys only in `.env` (Guardrail 2, see 07 §3.4).
@@ -57,7 +59,7 @@ Ref: Architecture §1 (07), Risks Q1 (05)
 
 ## Prioritization summary
 
-- **M1 seed corpus (MVP-core):** A1–A3, A6, A8, A10, B1–B3, B5, C1–C3, D2 → ~11 source classes + your compiled Excel to prove all 3 capabilities.
+- **Candidate source pool (not an M1 integration commitment):** A1–A3, A6, A8, A10, B1–B3, B5, C1–C3, D2 → ~11 source classes + your compiled Excel for the longer-term roadmap; choose the synthesis pilot subset after discovery.
 - **After M1 (MVP-extend), only if time:** A4, A5, A7, A9, B4, D1, D3.
 - **Explicitly deferred (not in MVP):** B6 Open States (state coverage), full OA ecosystem breadth, enterprise legal-vetting workflows.
 

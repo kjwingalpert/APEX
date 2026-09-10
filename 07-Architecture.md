@@ -3,6 +3,8 @@
 Status: **M0 locked (2026-09-10)** — stack + core decisions confirmed; build-phase `[TBD]`s remain
 Owner: [Kaia]
 Last updated: 2026-09-10
+
+Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 Ref: PRD (01), WBS (03), Risks (05), Acceptance (06)
 
 ## Conventions used
@@ -56,7 +58,7 @@ Guaranteed boundaries (non-optional):
 
 **Q1 RESOLVED (2026-09-01):** candidate source set confirmed by owner — see **[08-Sources.md](08-Sources.md)** (full registry with access details, licensing notes, tiers, and rationale per source).
 
-MVP-core seed set (M1): Library of Congress A–Z · PMC/PubMed BioC · OpenAlex · Oxford ORA · Crossref (Sage) · owner's compiled "Excel with Articles" · Congress.gov · GovInfo · PolicyNote (incl. CQ) · Senate Lobbying Disclosure (lda.gov) · CourtListener · Caselaw Access Project · Regulations.gov · Federal Register.
+Candidate pool for selecting the curated synthesis seed (not an all-source M1 requirement): Library of Congress A–Z · PMC/PubMed BioC · OpenAlex · Oxford ORA · Crossref (Sage) · owner's compiled "Excel with Articles" · Congress.gov · GovInfo · PolicyNote (incl. CQ) · Senate Lobbying Disclosure (lda.gov) · CourtListener · Caselaw Access Project · Regulations.gov · Federal Register.
 
 | Source class | Candidate sources (tier) | Access | Reuse posture |
 |---|---|---|---|
@@ -73,7 +75,7 @@ Rule for every source: link + attribution rendered with citations; full-text red
 Sources --(fetch)→ raw store --(parse PDF/HTML→text)--> normalized text
    --(chunk, sentence-aware)--> chunks
    --(embed)--> vectors -> Vector DB
-   --(structured fields)→ documents + events rows -> Postgres
+   --(structured fields)→ documents + versions rows -> D1
    --(dedup/version)--> version table integrity
 ```
 
@@ -92,7 +94,7 @@ Workflow:
 
 ### 1.4 Data warehouse/lake
 
-None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if corpus > `[TBD]`GB, revisit.
+None for MVP. Skip lake/lakehouse, use D1 + Vectorize + R2. Note if corpus > `[TBD]`GB, revisit.
 
 ---
 
@@ -103,19 +105,20 @@ None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if cor
 - **Embedding model:** **Workers AI `@cf/baai/bge-m3`** (LOCKED; multilingual, solid retrieval for policy text).
 - **Vector store:** **Cloudflare Vectorize** (LOCKED) — globally distributed; GA; ~$0 within free-tier for MVP corpus. If corpus scales far past MVP, pgvector/Pinecone re-evaluation noted in §5.5 (not a blocker).
 - **Retrieval design:** hybrid (dense vector + keyword/BM25-style fallback) `[TBD]`; top-k retrieval with rerank option `[TBD]` (reranker available via Workers AI `bge-reranker-base` if quality demands).
-- **AI Gateway presence:** all retrieval/AI traffic flows through AI Gateway for caching + cost accounting.
+- **AI Gateway presence:** model calls use AI Gateway. D1, R2, and Vectorize access use native Worker bindings; retrieval is not itself an LLM gateway call.
 
 ### 2.2 Generation — grounded RAG
 
-- **LLM:** **Anthropic Claude (LOCKED)** — **Claude Sonnet-class for synthesis** (user-facing summaries; best structured-JSON reliability for the claims/citations contract), **Claude Haiku-class for extraction** (stances, events, metadata — high-volume, cheap). No long-context surcharge + aggressive prompt caching (-90% input) make long RAG contexts cheap. Embeddings stay on Workers AI (bge-m3), so Anthropic is only called for generation.
+- **LLM:** **Anthropic Claude (LOCKED)** — **Claude Sonnet-class for synthesis** (user-facing summaries; best structured-JSON reliability for the claims/citations contract), **Claude Haiku-class for extraction** (stances, events, metadata — high-volume, cheap). Bound context and measure actual token usage; pricing and caching eligibility depend on the concrete model and request. Embeddings stay on Workers AI (bge-m3), so Anthropic is only called for generation.
 - Pattern: **retrieve → inject retrieved spans as context → generate with citation anchors** that the UI renders as `[n]` → link to span/URL. No free-form generation outside retrieved spans.
 - Sentence-level citation: model emits every claim tagged to one or more spans; post-processor maps to exact source passage + URL.
 
 ### 2.3 Verification step (mandatory, non-optional)
 
-- After generation, a **check pass** re-verifies every emitted citation resolves to an actual fetched span (exact/overlapping text match where feasible `[TBD]` tolerance).
-- Claims failing verification: dropped from output (not shown to user). This enforces "never hallucinate."
-- Classifier/matcher: simple overlap + `[TBD]` threshold; escalate to eval set when uncertain.
+- Check citation IDs, immutable document version, exact source spans, and source URLs against retrieved context.
+- Separately assess whether evidence supports each claim, including numbers, dates, qualifications, and contradictory findings. Text overlap alone is insufficient.
+- Withhold unsupported claims; return supported partial findings and explicit evidence gaps.
+- Combine automated checks with domain review. Model checks are fallible; no structural citation check guarantees truth. Evaluation thresholds and reviewer remain open.
 
 ### 2.4 Eval harness
 
@@ -125,8 +128,8 @@ None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if cor
 
 ### 2.5 Cost control (free-tester budget)
 
-- **Enforced via Cloudflare AI Gateway spend limits (LOCKED):** dollar-based budgets scoped by provider/model — soft alert at 80% of ceiling, hard block at 100%. Ceiling value `[TBD]` (owner decision, pending).
-- AI Gateway provides token/cost accounting per request and response caching (identical summaries served from cache).
+- **Enforced via Cloudflare AI Gateway spend limits (LOCKED):** dollar-based budgets scoped by provider/model — soft alert at 80% of ceiling, hard block at 100%. Total operating allowance is **$100/month**. AI allocation and enforcement configuration remain open; reserve hosting/read-access costs before setting an AI cap.
+- AI Gateway provides token/cost accounting per request and response caching (cache entries must respect private user ownership).
 - Rate limits per tester session; prefer Haiku-class for extraction and reserve Sonnet for synthesis only.
 - Monthly rollups reviewed at 05-Risks R3 tracking.
 
@@ -155,7 +158,7 @@ Type-safety across API⇄frontend via Hono RPC types (server route types inferre
 
 ### 3.2 Draft relational schema
 
-Single **Cloudflare D1** database (SQLite, LOCKED; read-replication scales for the tester cohort). Access layer: `drizzle-orm` or typed raw SQL (build-phase pick) — SQLModel is Python-only and not used. Embeddings live in **Vectorize**, not in D1. Tenant columns `user_id`, `organization_id` on all user-created rows (Guardrail 1). MVP single soft-tenant (a default org), but columns present.
+Single **Cloudflare D1** database (SQLite, LOCKED; read-replication scales for the tester cohort). Access layer: `drizzle-orm` or typed raw SQL (build-phase pick) — SQLModel is Python-only and not used. Embeddings live in **Vectorize**, not in D1. Tenant columns `user_id`, `organization_id` on all user-created rows (Guardrail 1). Public corpus records may be shared. Questions, summaries, claims, citations, and saved research must inherit authenticated user ownership; organization membership alone does not grant access to another tester’s research.
 
 ```
 users(id, email, display_name, role DEFAULT 'tester', created_at)
@@ -165,11 +168,13 @@ memberships(id, organization_id, user_id, role, created_at)
 documents(id, source_id, source_type, title, jurisdiction, doc_kind,
           published_at, version, content_full OR content_ref, metadata_json,
           created_by_user_id, organization_id, created_at)
-chunks(id, document_id, seq, text, span_start, span_end, embedding vector, org_scope)
+chunks(id, document_id, seq, text, span_start, span_end, vector_id, corpus_scope)
 versions(id, document_id, content_hash, changed_at)
 
-queries(id, user_id, organization_id, q_text, results_json, created_at)   -- audit/telemetry
-summary_jobs / citations:
+queries(id, user_id, organization_id, q_text, results_json, created_at)   -- private research
+usage_events(id, user_id, event_type, request_id, estimated_cost, created_at) -- no research text
+summaries(id, user_id, organization_id, query_id, status, created_at)
+summary claims / citations:
   claims(id, summary_id, text, sentence_idx)
   citations(id, claim_id, chunk_id, document_id, source_url, span_text, veracity)
 stances:
@@ -183,7 +188,7 @@ feedback_tasks (tester loop): (id, tester_user_id, task_type, started_at, comple
        claimed_time_saved, org_id)
 ```
 
-Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `stance_records(entity_id, issue_tag)`, `events(occurred_at)`, `queries(user_id, created_at)`. All queries scoped `organization_id = ?` / `user_id = ?` per tenant rule.
+Index notes: `documents(jurisdiction, published_at)`, `claims(summary_id)`, `stance_records(entity_id, issue_tag)`, `events(occurred_at)`, `queries(user_id, created_at)`. All queries scoped `organization_id = ?` / `user_id = ?` per tenant rule.
 
 ### 3.3 API endpoints (draft list)
 
@@ -217,7 +222,7 @@ Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `st
 
 ### 4.1 Stack
 
-- Framework: **Next.js/React SPA** (LOCKED; optionally Vite SPA via Cloudflare Vite plugin — same components).
+- Framework: **Vite + React SPA** (confirmed 2026-09-10). Hono owns the API; no Next.js runtime or server rendering is required.
 - Styling: **Tailwind CSS** (LOCKED).
 - Components: **shadcn/ui** (LOCKED).
 - Data fetching/state: **React Query (TanStack Query)** (LOCKED).
@@ -268,7 +273,7 @@ Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `st
 - Hosting **LOCKED: Cloudflare** — Workers (API) + Pages/Static Assets (frontend) / Worker Assets; D1, Vectorize, R2, Workers AI, AI Gateway all on the same account. No VPS/PaaS.
 - Observability: AI Gateway logs/metrics for AI; Worker logs + D1 analytics; structured logs + token cost rollups via AI Gateway. Uptime not critical in testing window.
 - CI: `wrangler deploy` via GitHub Actions (or Workers Builds); `.env.example` + `wrangler secret put` for keys.
-- Cost budget: infra ~$0 (free tiers); AI usage dominates → enforced by AI Gateway spend limits (§2.5 and `[CONFIRM]` ceiling).
+- Cost budget: $100/month total approved. Stop new AI requests at the allocated limit, preserve existing research access, and require owner approval for more spending. Verify gateway enforcement capabilities during setup; do not assume an AI limit caps all Cloudflare charges.
 
 ## 5.5 Decision framework — how these defaults were derived
 
@@ -282,18 +287,20 @@ Every recommendation in this doc is derived from engineering principles and the 
 
 ### Technology maturity evidence
 
-The defaults are widely deployed and actively maintained components that interoperate cleanly: FastAPI for the API, Next.js/React for the UI, Postgres + pgvector for relational + vector storage, and retrieval-grounded generation (chunking → embeddings → hybrid search → re-ranking) as the mainstream production pattern for verifiable generative features. Choosing these minimizes deployment risk and troubleshooting time; nothing in the default set is fringe or experimental.
+The selected design uses Hono/TypeScript on Workers, Vite + React, D1, Vectorize, and R2. Native platform bindings reduce integration work; retrieval-grounded generation and verification remain separate application responsibilities.
 
 ### Sharpening decisions
 
 - **Frontend conventions:** Tailwind + shadcn/ui + React Query — broadly used conventions with strong documentation; fast to build and debug (§4.1).
-- **ORM:** SQLModel (the official FastAPI full-stack template stack) — typed, keeps schema and validation in sync (§3.2).
+- **ORM:** Drizzle or typed raw SQL remains open. Both must support D1 migrations and explicit user scoping (§3.2).
 - **Core engineering surface:** citation-verified synthesis + eval harness + cost-cap loop is the product's hardest engineering requirement — build it as a first-class subsystem (WBS Phase 3), not an afterthought.
 - **Async seam:** long-running AI calls should eventually move to a background-job queue; documented as a seam, kept OUT of the MVP build, added if tester latency demands it.
 
 ---
 
 ## 6. Decision register (ADR-lite)
+
+Canonical decision history and rationale: [decision log](docs/decisions/README.md). Historical alternatives below are retained for context; current choices follow that log.
 
 Every decision below states its **rationale** — so the "why" is captured, not just the "what". Status: `Done` (locked) or `Recommended` (my default; awaiting your confirmation).
 
@@ -310,13 +317,13 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 | # | Decision | Why this choice (rationale) | Alternative considered | Status |
 |---|---|---|---|---|
 | Q4 | Vector store: **Cloudflare Vectorize** (+ D1 for relational) | GA, globally distributed, ~$0 within free tier for MVP corpus; single platform for embeddings + queries, no egress; native Worker binding. Scale path: pgvector/Pinecone if corpus outgrows. | Postgres+pgvector: fine but spins up managed PG; D1 covers relational data + tenant scoping | **Done** |
-| Q2 | **Claude (Anthropic) — Sonnet-class for synthesis, Haiku-class for extraction; embeddings bge-m3 via Workers AI** | Best structured-JSON reliability for the claims/citations contract; no long-context surcharge; -90% prompt caching. Cheap embeddings stay in-platform. Concrete model IDs + key `[TBD]` (owner). | Bare Workers AI open models for synthesis: cheap but weaker instruction-following for citation JSON | **Done** |
-| Q3 | **Cost ceiling via AI Gateway spend limits** — soft alert 80%, hard block 100% | AI Gateway provides dollar-based budgets scoped by provider/model; one config block instead of custom code. Ceiling value `[TBD]` (owner). | No limit: risky for a free prototype | **Done (value TBD)** |
+| Q2 | **Claude (Anthropic) — Sonnet-class for synthesis, Haiku-class for extraction; embeddings bge-m3 via Workers AI** | Best structured-JSON reliability for the claims/citations contract; Model-dependent pricing and caching; measure cost before selecting IDs. Cheap embeddings stay in-platform. Concrete model IDs + key `[TBD]` (owner). | Bare Workers AI open models for synthesis: cheap but weaker instruction-following for citation JSON | **Done** |
+| Q3 | **Cost ceiling via AI Gateway spend limits** — soft alert 80%, hard block 100% | AI Gateway provides dollar-based budgets scoped by provider/model; one config block instead of custom code. $100/month total approved; AI allocation and enforcement TBD. | No limit: risky for a free prototype | **Total approved; allocation TBD** |
 | Q6 | API: **Hono (TypeScript) on Cloudflare Workers** | Edge-native, ~$0, native bindings, one language across frontend+API+pipeline; matches operator's proven stack. | FastAPI (VPS or Python Workers): constrains to paid infra or beta WASM runtime | **Done** |
 | Q5 | Hosting: **Cloudflare** (Workers/Pages, D1, Vectorize, R2, Workers AI, AI Gateway) | Free tiers cover MVP; scaling = hand off to the edge; zero infra hobby. | Fly.io/Render/Railway VPS: paid, manually scaled, outside operator's skill stack | **Done** |
 | Q7 | Charting: **Recharts-style declarative** | Pro/Con dashboard + timeline are standard charts; declarative lib is fast to ship and React-native. | D3: full control, overkill for MVP views | **Done** |
 | 2.1 | Retrieval: **hybrid dense + keyword fallback** (rerank optional via bge-reranker-base) | Dense embeddings catch semantics; keyword catches exact citations/numbers; combined recall protects citation-groundedness. | Dense-only: simplest, misses exact-match edge cases | **Recommended** |
-| 2.2 | Generation: **retrieve → grounded generation with span anchors**; never free-form beyond retrieved spans | Structural guarantee of truthfulness; UI renders `[n]`→span→URL. | Agentic open search: flexible but unpredictable citations | **Done (pattern locked)** |
+| 2.2 | Generation: **retrieve → grounded generation with span anchors**; never free-form beyond retrieved spans | Structural citation traceability; semantic support requires separate checks; UI renders `[n]`→span→URL. | Agentic open search: flexible but unpredictable citations | **Done (pattern locked)** |
 | 3.2 | DB access: **Drizzle-ORM or typed raw SQL** (build-phase pick) | No Python ORM in a TS stack; typed schema + migrations for D1. | SQLModel: Python-only, not applicable on Workers | **Recommended (build-phase)** |
 | 4.1 | Frontend conventions: **Tailwind + shadcn/ui + React Query** | Mature, documented, widely used UI stack; declarative and fast to build/debug. | Custom CSS / bespoke state: slower, less discoverable | **Done** |
 
@@ -325,18 +332,18 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 | Date | Open item | Why deferred |
 |---|---|---|
 | — | Q8 tester cohort (who/how many/channel) | Needs product decisions, not architecture |
-| — | Q9 launch date / testing window | Needs schedule decision |
+| — | Q9 testing window (shipping deadline November 3, 2026) | Needs schedule decision |
 | — | Q10 time-saved target metric (e.g. ≥X%) | Needs baseline data from a small dry-run |
 
 ## 7. Decisions checklist (mirrors 05-Risks Q list)
 
 - [x] Q1 source list ✅ (13 MVP-core classes; see 08-Sources.md — licensing review pending in Phase 1)
 - [x] Q2 LLM + embedding providers ✅ (Anthropic Claude Sonnet/Haiku + Workers AI bge-m3; **concrete model IDs + key rotation pending**)
-- [ ] Q3 AI cost ceiling ✅ mechanism (AI Gateway spend limits: soft 80% / hard 100%) — **ceiling value TBD**
+- [ ] Q3 AI cost ceiling ✅ mechanism (AI Gateway spend limits: soft 80% / hard 100%) — **$100/month total approved; AI allocation/enforcement TBD**
 - [x] Q4 vector store ✅ (Cloudflare Vectorize)
 - [x] Q5 hosting provider ✅ (Cloudflare — Workers/Pages/D1/Vectorize/R2/Workers AI/AI Gateway)
 - [x] Q6 API framework ✅ (Hono + TypeScript on Cloudflare Workers)
-- [x] Q7 frontend + charting ✅ (Next.js/Vite React + Tailwind + shadcn/ui + React Query + Recharts)
+- [x] Q7 frontend + charting ✅ (Vite + React + Tailwind + shadcn/ui + React Query + Recharts)
 - [ ] Q8 tester cohort
-- [ ] Q9 launch date/window
+- [x] Q9 shipping deadline November 3, 2026; testing window remains open
 - [ ] Q10 time-saved target metric

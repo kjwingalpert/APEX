@@ -2,7 +2,9 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
+
+Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
 Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimates are day-effort units for a solo/small build (revised 2026-09-10 for Cloudflare stack). Owners default to [Kaia].
 
@@ -10,7 +12,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 0.1 | ~~Confirm MVP tech stack~~ ✅ **DONE (2026-09-10)** — locked: Hono/TS Workers API; Next/Vite React frontend; D1 + Vectorize + R2; Workers AI (bge-m3) + Anthropic Claude; AI Gateway spend limits; hosting = Cloudflare (see 07-Architecture §6.2) | Kaia | 1d | — |
+| 0.1 | ~~Confirm MVP tech stack~~ ✅ **DONE (2026-09-10)** — locked: Hono/TS Workers API; Vite + React frontend; D1 + Vectorize + R2; Workers AI (bge-m3) + Anthropic Claude; AI Gateway spend limits; hosting = Cloudflare (see 07-Architecture §6.2) | Kaia | 1d | — |
 | 0.2 | Init git repo + GitHub; branch strategy (main + feature) | Kaia | 0.5d | 0.1 |
 | 0.3 | Repo scaffolding: pnpm workspace (`apps/web`, `apps/api`, `packages/`, `pipeline/`), lint/format, wrangler config, CI basics | Kaia | 1d | 0.2 |
 | 0.4 | Secrets setup (`.env.example`, `wrangler secret put` pattern, guard rails; **rotate leaked prod key per R10**; verify nothing committed) | Kaia | 0.5d | 0.3 |
@@ -20,7 +22,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 1.1 | Finalize source list: MVP-core set from 08-Sources.md (13 classes); fallback to MVP-extend only if needed | Kaia | 1d | 0.1 |
+| 1.1 | Select a small curated seed subset from 08-Sources.md after pilot discovery; do not integrate every candidate source | Kaia | 1d | 0.1 |
 | 1.2 | Source licensing/terms review per 08-Sources licensing questions (what can be stored vs link-only) | Kaia | 1d | 1.1 |
 | 1.3 | API/integration spike per source (Congress.gov/GovInfo, journal APIs, court filings) | Kaia | 2d | 1.1 |
 | 1.4 | Auth middleware wrapper implemented in Hono (single middleware; email/password or magic link sessions) | Kaia | 1d | 0.2 |
@@ -41,9 +43,9 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 |---|---|---|---|---|
 | 3.1 | Retrieval pipeline: query → retrieve → ground LLM generation in retrieved spans | Kaia | 3d | 2.4 |
 | 3.2 | Citation grounding design: claim ↔ source span ↔ URL mapping rendered in output | Kaia | 2d | 3.1 |
-| 3.3 | Verification step: post-generation check that every citation resolves to a real retrieved span (no hallucinated refs) | Kaia | 2d | 3.2 |
+| 3.3 | Verification step: citation integrity checks plus separate claim-support verification and evidence-gap handling | Kaia | 2d | 3.2 |
 | 3.4 | Eval harness: golden set of Q&A/highlights; hallucination + citation-recall metrics | Kaia | 2d | 3.3 |
-| 3.5 | Cost monitoring: token/request logging vs `[CONFIRM]` ceiling | Kaia | 1d | 3.1 |
+| 3.5 | Cost monitoring: token/request logging within $100/month total operating allowance | Kaia | 1d | 3.1 |
 
 ## Phase 4 — Semantic Search + AI Summaries (Frontend Core) (Estimates: 6–8d)
 
@@ -54,7 +56,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 | 4.3 | Summary UI: AI takeaways with sentence-level citation chips/anchors + links | Kaia | 2d | 4.1 |
 | 4.4 | Guardrail test: no unscoped query; scoped-by-tenant on every endpoint | Kaia | 0.5d | 4.1, 0.5 |
 
-## Phase 5 — Pro/Con Stance Tracker (Estimates: 6–9d)
+## Phase 5 — Deferred: Pro/Con Stance Tracker (Estimates: 6–9d)
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
@@ -63,7 +65,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 | 5.3 | Pro/Con visualization (dashboard): entity-by-issue stance counts + evidence drilldown | Kaia | 2.5d | 5.2, 4.2 |
 | 5.4 | Support targeting: export/share view for lobbying strategy meeting | Kaia | 1.5d | 5.3 |
 
-## Phase 6 — Action Tracer (Estimates: 5–7d)
+## Phase 6 — Deferred: Action Tracer (Estimates: 5–7d)
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
@@ -75,7 +77,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 7.1 | Recruit tester cohort (non-profit researchers, advocacy groups) | Kaia | parallel | 4.3 |
+| 7.1 | Recruit tester cohort (non-profit researchers, advocacy groups) | Kaia | parallel | outreach by September 24 |
 | 7.2 | Light-touch sign-in for testers (free access; modular auth wrapper) | Kaia | 1.5d | 4.1 |
 | 7.3 | Session guidance: real prep tasks (lobbying, testimony, coalitions) + time-saved survey | Kaia | 1d | 7.1, 7.2 |
 | 7.4 | Usage analytics for time-saved baseline (task timers, task completion) | Kaia | 2d | 4.1 |
@@ -85,12 +87,12 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 8.1 | QA against acceptance criteria (06) incl. citation-integrity pass | Kaia | 2d | all |
+| 8.1 | QA against acceptance criteria (06) incl. citation-integrity pass | Kaia | 2d | synthesis release phases; excludes deferred 5–6 |
 | 8.2 | Data cleanup, seed corpus refresh, secrets review | Kaia | 0.5d | 8.1 |
 | 8.3 | Deploy + free-tier hosting check (`[CONFIRM]` provider) | Kaia | 1d | 8.1 |
 | 8.4 | Tester launch + metrics dashboard live | Kaai | 0.5d | 8.3 |
 
-**Totals:** 8 phases, ~46–68d effort (solo build path). Re-baseline after Cloudflare stack lock (2026-09-10): infra-adjacent tasks (0.3–0.5, 2.4, 8.3) shrink; AI/citation core (Phase 3) unchanged.
+**Historical estimate, superseded for release planning:** ~46–68d effort for the full roadmap, not a commitment for synthesis-first MVP. A revised hour-based build plan is still required. Re-baseline after Cloudflare stack lock (2026-09-10): infra-adjacent tasks (0.3–0.5, 2.4, 8.3) shrink; AI/citation core (Phase 3) unchanged.
 
 ## Open WBS decisions
 - 0.1 stack is confirmed (2026-09-10); Phases 1–3 estimates reflect the Cloudflare/Workers stack.

@@ -8,7 +8,7 @@ Build a functional web prototype that proves AI can automatically aggregate, syn
 
 **First build priorities:**
 1. **Demonstrate Verifiable Synthesis** — search pre-loaded policy data (open-access journals, congressional records) and generate high-impact takeaways backed by exact, sentence-level citations that never hallucinate.
-2. **Deliver the 3 core capabilities** — Research Repository (fast semantic search + instant AI summaries), Stance Tracker (visual Pro/Con breakdown), Action Tracer (timeline of historical precedent and regulatory evolution).
+2. **Ship synthesis first** — Research Repository with semantic search and cited summaries. Stance Tracker and Action Tracer follow pilot validation.
 3. **Validate the target audience workflow** — test with real non-profit researchers and small advocacy groups to confirm measurable time saved preparing for direct lobbying, expert testimony, and coalition building.
 
 > Future direction: B2B/B2G scaling, monetization, multi-tenant feels. The MVP is deliberately a **free, usable product** to prove value with testers first.
@@ -25,23 +25,23 @@ Build a functional web prototype that proves AI can automatically aggregate, syn
 | [06-Acceptance-Criteria.md](06-Acceptance-Criteria.md) | Per-phase "done" definitions + guardrails |
 | [07-Architecture.md](07-Architecture.md) | Detailed technical spec (data, AI/RAG, backend/DB, frontend/viz) |
 | [08-Sources.md](08-Sources.md) | Data source registry: access, licensing, tier, and the "why" for each |
-| [Project APEX.md](Project%20APEX.md) | Source-of-truth overview (kept as-is) |
-| [Meeting-Notes/](Meeting-Notes/) | Dated decision/meeting notes going forward |
+| [Project APEX.md](Project%20APEX.md) | Original vision; current scope is defined in 02-MVP-Scope.md |
+| [Decision log](docs/decisions/README.md) | Approved decisions, rationale, tradeoffs, and unresolved choices |
 
 ## Tech Stack (locked 2026-09-10, Milestone M0)
 
 - **API:** Hono + TypeScript on Cloudflare Workers
-- **Frontend:** Next.js/React (Vite-compatible) + Tailwind + shadcn/ui + React Query + Recharts
+- **Frontend:** Vite + React + Tailwind + shadcn/ui + React Query + Recharts
 - **Data:** Cloudflare D1 (SQLite, relational) + Vectorize (embeddings) + R2 (raw docs)
 - **AI:** Workers AI `bge-m3` embeddings; Anthropic Claude (Sonnet synthesis / Haiku extraction); Cloudflare AI Gateway for cost spend-limits, caching, fallbacks
 - **Hosting:** Cloudflare (Workers, Pages, D1, Vectorize, R2, Workers AI, AI Gateway)
-- Full rationale + decision register: [07-Architecture.md](07-Architecture.md)
+- Current technical specification: [07-Architecture.md](07-Architecture.md)
 
 ## Status
 
 - [x] Planning docs drafted
 - [x] Architecture decisions confirmed (M0 locked, 2026-09-10 — see 07-Architecture.md §6.2)
-  - [ ] Remaining `[TBD]`: Q3 ceiling value, concrete model IDs/key rotation, build-phase picks (WBS 0.x + Phase 1)
+  - [ ] Remaining `[TBD]`: AI allocation/enforcement within $100/month, concrete model IDs/key rotation, build-phase picks (WBS 0.x + Phase 1)
 - [x] Git repo initialized + GitHub live ([kjwingalpert/APEX](https://github.com/kjwingalpert/APEX))
 - [ ] Repo scaffolded (WBS 0.3)
 - [ ] MVP built and user-testing-ready

@@ -2,7 +2,9 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
+
+Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
 ## 1. Problem
 
@@ -39,12 +41,12 @@ APEX exists to help answer all three faster and with verifiable evidence.
 - Every takeaway includes verifiable, sentence-level citations linking claims to source spans.
 - **Quality bar:** citations never hallucinate; every rendered claim maps to an exact source passage and link.
 
-### 3.2 Stance Tracker (Pro/Con)  [P0]
+### 3.2 Stance Tracker (Pro/Con)  [Deferred]
 - Analyzes public statements, legislative actions, and historical arguments.
 - Visual Pro/Con dashboard quantifying where government entities and policymakers stand on an issue.
 - Supports targeting direct lobbying, testimony, community data, and coalition building.
 
-### 3.3 Decision & Action Tracer  [P0]
+### 3.3 Decision & Action Tracer  [Deferred]
 - Maps historical precedent of an issue: evolution of policies, court decisions, and regulatory actions over time.
 - Basic timeline view of precedent and regulatory evolution.
 
@@ -55,15 +57,15 @@ APEX exists to help answer all three faster and with verifiable evidence.
 | Verifiable, sentence-level citations | P0 | Core differentiator vs. generic AI; do not ship without it |
 | Semantic search across policy corpus | P0 | Foundation for all three capabilities |
 | Instant AI summaries | P0 | Core value of repository capability |
-| Pro/Con stance dashboard | P0 | Validate with testers that stance data is usable for strategy |
-| Precedent/regulatory timeline | P0 | Basic version; depth can iterate |
-| Tester cohort access (free sign-up) | P1 | Light-touch, no auth/roles yet |
+| Pro/Con stance dashboard | Deferred | Validate with testers that stance data is usable for strategy |
+| Precedent/regulatory timeline | Deferred | Basic version; depth can iterate |
+| Tester cohort access (free sign-up) | P1 | Light-touch authenticated access; private research |
 | Usage analytics for time-saved validation | P1 | Measure the success metric |
 | Corpus expansion beyond seeded sources | P2 | Post-tester feedback |
 
 ## 5. Success Metrics
 
-- **Primary:** Testers report meaningful time saved (e.g. vs. baseline research time) preparing lobbying, testimony, or coalition work.
+- **Primary:** Testers return for real research tasks; weekly use is acceptable when research is not daily. Collect time-saved feedback as a supporting measure; numeric targets remain open.
 - **Quality:** 0 hallucinated citations in tested sessions; every claim renders a source link.
 - **Engagement:** Tester cohort uses the product for real prep tasks, not demos.
 - **Qualitative:** Non-profit researchers find stance and precedent views credible and actionable.
@@ -72,8 +74,8 @@ APEX exists to help answer all three faster and with verifiable evidence.
 
 - **User/Org Data Isolation — always:** every database row created by a user carries a `user_id` and/or `organization_id`; all queries are scoped by tenant by default. (B2B isolation later = already correct SQL.)
 - **Secrets hygiene:** API keys (Claude/OpenAI, any provider) live only in environment variables / managed secrets. Never in code, `.env` files committed, or frontend repos.
-- **Modular auth:** authentication sits behind one centralized middleware/wrapper (e.g. NextAuth, FastAPI middleware). Swapping basic login for Enterprise SSO later must touch one module.
-- **Cost-conscious:** MVP runs free for testers; LLM/embedding spend must stay under an agreed ceiling (`[CONFIRM]` in 05-Risks / 07-Architecture).
+- **Modular auth:** authentication sits behind one centralized middleware/wrapper (Hono middleware). Swapping basic login for Enterprise SSO later must touch one module.
+- **Cost-conscious:** MVP runs free for testers; LLM/embedding spend must stay under the approved $100/month total allowance; AI allocation and enforcement remain open.
 - **Fast iteration:** decisions in `07-Architecture.md` default to managed services to keep the build small.
 
 ## 7. Out of Scope for v1

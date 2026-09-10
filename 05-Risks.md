@@ -10,7 +10,7 @@ Last updated: 2026-09-10
 |---|---|---|---|---|
 | R1 | **Hallucinated citations undermine the core promise** | Medium | Critical | Retrieval-grounded generation + mandatory post-generation verification step; eval harness in Phase 3; every claim renders a source link or is withheld |
 | R2 | **Data source access/licensing constraints** (what can be summarized/redistributed) | Medium | High | Source terms review in Phase 1; prefer APIs with clear reuse terms ([CONFIRM] source list); summary-only + link approach to reduce legal surface |
-| R3 | **LLM/embedding cost exceeds free-tester budget** | High | Medium | **AI Gateway spend limits (soft 80% / hard 100% block) + response caching + rate limits**; cheap Haiku-class for extraction; token/cost accounting built into the gateway; `[CONFIRM]` ceiling value pending |
+| R3 | **LLM/embedding cost exceeds free-tester budget** | High | Medium | **AI Gateway spend limits (soft 80% / hard 100% block) + response caching + rate limits**; cheap Haiku-class for extraction; token/cost accounting built into the gateway; $100/month total approved; AI allocation/enforcement pending |
 | R4 | **Tester recruitment too slow** (non-profits/advocacy are busy) | Medium | High | Start recruitment early (parallel with Phase 4); low-friction sign-in; offer usable artifact (brief/one-pager) as incentive |
 | R5 | **Scoped-data violations slipping in (tenant isolation)** | Low | Medium | Guardrail acceptance checks: every endpoint scoped by tenant; code review + CI check |
 | R6 | **Secret leak via committed `.env` or frontend key usage** | Low | Critical | Secrets only in env; `.env.example` only; CI secret-scan; never call LLM vendor directly from browser |
@@ -38,7 +38,7 @@ Last updated: 2026-09-10
 | Q4 | ~~Vector store?~~ ✅ **Resolved** — Cloudflare Vectorize (GA). | Done |
 | Q5 | ~~Deploy/hosting provider?~~ ✅ **Resolved** — Cloudflare (Workers + Pages, D1, Vectorize, R2, Workers AI, AI Gateway). | Done |
 | Q6 | ~~Backend framework?~~ ✅ **Resolved** — Hono + TypeScript on Cloudflare Workers. | Done |
-| Q7 | ~~Frontend + charting?~~ ✅ **Resolved** — Next.js/Vite React + Tailwind + shadcn/ui + React Query + Recharts. | Done |
+| Q7 | ~~Frontend + charting?~~ ✅ **Resolved** — Vite + React + Tailwind + shadcn/ui + React Query + Recharts. | Done |
 | Q8 | First pilot organization/contact in Los Angeles, policy issue, cohort size, and sign-up channel? Owner needs to speak with a prospective organization first. | Open — owner outreach by September 24, 2026; grilling Q6 |
 | Q9 | Shipping deadline: **November 3, 2026**, independent of an election-related workflow. Pilot start and testing window remain open. | Deadline resolved; testing window TBD |
 | Q10 | Repeat use for real research tasks; weekly use is acceptable when research is not daily. Cohort, observation window, retention threshold, and time-saved target remain TBD. | Direction resolved; numeric criteria open |
@@ -54,7 +54,7 @@ Last updated: 2026-09-10
 ## Owner decisions — grilling session, 2026-09-10
 
 - Evidence quality takes precedence over the shipping date: reduce coverage or delay the pilot if material unsupported claims remain.
-- First release prioritizes research synthesis. Stance Tracker and Action Tracer are later priorities; existing all-three release gates in the scope and acceptance docs need reconciliation before implementation planning.
+- First release prioritizes research synthesis. Stance Tracker and Action Tracer are later priorities; scope and acceptance docs now exclude the deferred capabilities from the first release gates.
 - Evidence verification must check that the source supports the claim, including qualifications and context, not merely that the citation exists. Withhold unsupported claims.
 - Quality assurance combines domain review of real question/answer samples with layered automated checks. Reviewer identity, evaluation thresholds, and exact checks remain open; more checks alone do not establish accuracy.
 - Owner availability: **10 hours per week**, approximately **77 hours** from September 10 to November 3. Allocate time for outreach, evidence review, and feedback as well as development.
