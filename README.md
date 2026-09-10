@@ -28,9 +28,20 @@ Build a functional web prototype that proves AI can automatically aggregate, syn
 | [Project APEX.md](Project%20APEX.md) | Source-of-truth overview (kept as-is) |
 | [Meeting-Notes/](Meeting-Notes/) | Dated decision/meeting notes going forward |
 
+## Tech Stack (locked 2026-09-10, Milestone M0)
+
+- **API:** Hono + TypeScript on Cloudflare Workers
+- **Frontend:** Next.js/React (Vite-compatible) + Tailwind + shadcn/ui + React Query + Recharts
+- **Data:** Cloudflare D1 (SQLite, relational) + Vectorize (embeddings) + R2 (raw docs)
+- **AI:** Workers AI `bge-m3` embeddings; Anthropic Claude (Sonnet synthesis / Haiku extraction); Cloudflare AI Gateway for cost spend-limits, caching, fallbacks
+- **Hosting:** Cloudflare (Workers, Pages, D1, Vectorize, R2, Workers AI, AI Gateway)
+- Full rationale + decision register: [07-Architecture.md](07-Architecture.md)
+
 ## Status
 
 - [x] Planning docs drafted
-- [ ] Architecture decisions confirmed ([CONFIRM] items in 07-Architecture.md)
-- [ ] Git repo initialized (when coding starts)
+- [x] Architecture decisions confirmed (M0 locked, 2026-09-10 — see 07-Architecture.md §6.2)
+  - [ ] Remaining `[TBD]`: Q3 ceiling value, concrete model IDs/key rotation, build-phase picks (WBS 0.x + Phase 1)
+- [x] Git repo initialized + GitHub live ([kjwingalpert/APEX](https://github.com/kjwingalpert/APEX))
+- [ ] Repo scaffolded (WBS 0.3)
 - [ ] MVP built and user-testing-ready

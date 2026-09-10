@@ -1,8 +1,8 @@
 # APEX — Architecture (MVP v1, Detailed Technical Spec)
 
-Status: Draft (many `[CONFIRM]` / `[TBD]` items await build decisions)
+Status: **M0 locked (2026-09-10)** — stack + core decisions confirmed; build-phase `[TBD]`s remain
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
 Ref: PRD (01), WBS (03), Risks (05), Acceptance (06)
 
 ## Conventions used
@@ -23,30 +23,29 @@ Ref: PRD (01), WBS (03), Risks (05), Acceptance (06)
                         └──────────────────┬───────────────────────────┘
                                            │ HTTPS (JSON)
                         ┌──────────────────▼───────────────────────────┐
-                        │              API / BACKEND                   │
-                        │  Auth middleware (single wrapper)[CONFIRM]   │
+                        │        API — CLOUDFLARE WORKERS (Hono/TS)    │
+                        │  Auth middleware (single wrapper, LOCKED)    │
                         │  Endpoints: search · summarize · document ·  │
                         │  stances · events · session                  │
                         └───────┬───────────────────┬──────────────────┘
                                 │                   │
               ┌─────────────────▼────┐   ┌──────────▼───────────────┐
-              │  DATA / INGESTION    │   │  AI / RAG  (server-side) │
-              │  Source connectors → │   │  Embeddings · Vector DB  │
-              │  normalize (PDF/HTML │   │  Retrieval → grounded    │
-              │  → text/structured)  │   │  generation → verification│
-              │  dedup · versioning  │   │  eval harness · cost log  │
-              └─────────┬────────────┘   └──────────┬───────────────┘
-                        └────────────┬──────────────┘
-                              ┌──────▼──────┐
-                              │  Postgres   │  (relational + optional
-                              │  (+vector)  │   pgvector [CONFIRM])
-                              └─────────────┘
+              │  AI / RAG            │   │     DATA (Cloudflare)    │
+              │  AI Gateway (cost,   │   │  D1 — relational, tenant │
+              │   caching, fallback) │   │  Vectorize — embeddings  │
+              │  Workers AI: embed   │   │  R2 — raw docs / PDFs    │
+              │   (bge-m3) + cheap   │   │  Cron/R2 → ingestion     │
+              │   inference          │   └──────────────────────────┘
+              │  Claude (Anthropic): │
+              │   Sonnet synthesis · │
+              │   Haiku extraction   │
+              └──────────────────────┘
 ```
 
 Guaranteed boundaries (non-optional):
 
-- **No LLM keys in browser.** All model calls are proxied server-side.
-- **Auth is a middleware wrapper**, not per-route code.
+- **No LLM keys in browser.** All model calls are proxied server-side (Worker → AI Gateway).
+- **Auth is a middleware wrapper**, not per-route code (Hono middleware).
 - **All writes follow the tenant-scoping convention** (Guardrail 1).
 
 ---
@@ -83,7 +82,7 @@ Workflow:
 2. **Normalize:** PDF/HTML → text with layout + section preservation; extract metadata (jurisdiction, doc type, date, entities, gov action types).
 3. **Dedup & version:** content-hash; store previous versions; keep source canonical, expose `latest` view.
 4. **Chunk:** sentence-aware chunking with `[TBD]`-token overlap; keep per-chunk source span anchors (needed for 3.2 citation grounding).
-5. **Embed + index:** `[CONFIRM]` embedding model + vector DB; store chunk ↔ source span map.
+5. **Embed + index:** Workers AI **bge-m3** embeddings → **Vectorize** (LOCKED); store chunk ↔ source span map.
 
 ### 1.3 Ingestion scheduling vs triggers
 
@@ -101,13 +100,14 @@ None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if cor
 
 ### 2.1 Retrieval layer
 
-- **Embedding model:** `[CONFIRM] (e.g. bge-m3 / OpenAI text-embedding-3 / Cohere embed-v4)`.
-- **Vector store:** `[CONFIRM]` — default recommendation: **Postgres + pgvector** (one tech to run; enough for MVP corpus). Managed vector DB (Pinecone) only if corpus/scale pull ahead.
-- **Retrieval design:** hybrid (dense vector + BM25 fallback) `[TBD]`; top-k retrieval with rerank option `[TBD]` if quality demands.
+- **Embedding model:** **Workers AI `@cf/baai/bge-m3`** (LOCKED; multilingual, solid retrieval for policy text).
+- **Vector store:** **Cloudflare Vectorize** (LOCKED) — globally distributed; GA; ~$0 within free-tier for MVP corpus. If corpus scales far past MVP, pgvector/Pinecone re-evaluation noted in §5.5 (not a blocker).
+- **Retrieval design:** hybrid (dense vector + keyword/BM25-style fallback) `[TBD]`; top-k retrieval with rerank option `[TBD]` (reranker available via Workers AI `bge-reranker-base` if quality demands).
+- **AI Gateway presence:** all retrieval/AI traffic flows through AI Gateway for caching + cost accounting.
 
 ### 2.2 Generation — grounded RAG
 
-- **LLM:** `[CONFIRM]` (candidate Claude for summaries/Haiku-class for speed; OpenAI/Cohere embeddings `[TBD]`).
+- **LLM:** **Anthropic Claude (LOCKED)** — **Claude Sonnet-class for synthesis** (user-facing summaries; best structured-JSON reliability for the claims/citations contract), **Claude Haiku-class for extraction** (stances, events, metadata — high-volume, cheap). No long-context surcharge + aggressive prompt caching (-90% input) make long RAG contexts cheap. Embeddings stay on Workers AI (bge-m3), so Anthropic is only called for generation.
 - Pattern: **retrieve → inject retrieved spans as context → generate with citation anchors** that the UI renders as `[n]` → link to span/URL. No free-form generation outside retrieved spans.
 - Sentence-level citation: model emits every claim tagged to one or more spans; post-processor maps to exact source passage + URL.
 
@@ -125,10 +125,10 @@ None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if cor
 
 ### 2.5 Cost control (free-tester budget)
 
-- Token accounting per request; daily + monthly rollups vs `[CONFIRM]` ceiling.
-- Caching of identical/computed summaries; rate limits per tester session.
-- Prefer cheap models (Haiku-class) for extraction; reserve flagship for synthesis only if necessary.
-- Soft alert at 80% of ceiling; hard pause at 100% `[CONFIRM]`.
+- **Enforced via Cloudflare AI Gateway spend limits (LOCKED):** dollar-based budgets scoped by provider/model — soft alert at 80% of ceiling, hard block at 100%. Ceiling value `[TBD]` (owner decision, pending).
+- AI Gateway provides token/cost accounting per request and response caching (identical summaries served from cache).
+- Rate limits per tester session; prefer Haiku-class for extraction and reserve Sonnet for synthesis only.
+- Monthly rollups reviewed at 05-Risks R3 tracking.
 
 ### 2.6 Stance & event extraction (capabilities 2 & 3 data layer)
 
@@ -141,18 +141,21 @@ None for MVP. Skip lake/lakehouse, go straight to Postgres + vector. Note if cor
 
 ### 3.1 API framework
 
-`[CONFIRM]` candidates:
+**LOCKED: Hono (TypeScript) on Cloudflare Workers.** Decision date 2026-09-10.
 
-| Option | Fit for MVP |
+| Considered | Verdict |
 |---|---|
-| **FastAPI (Python)** | Aligns with ingestion/LLM ecosystem; typed; fast to extend; single language across data layer |
-| Next.js API routes (TypeScript) | One language with frontend; but co-locates heavy AI logic |
+| **Hono + TypeScript (Workers)** | Selected: edge-native, ~$0 free tier, native D1/Vectorize/R2/Workers AI/AI Gateway bindings, single language across frontend + API + pipeline; matches operator's proven stack (pnpm monorepo → wrangler) |
+| FastAPI on Python Workers | Viable (Cloudflare supports FastAPI via ASGI on Python Workers) but open-beta WASM runtime; constrains the Python ecosystem advantage; two type systems. Revisit only if heavy Python data processing enters the request path |
+| FastAPI on VPS/PaaS | Original doc default; rejected at M0: adds paid infra + candid ops that Cloudflare provides free |
 
-Default recommendation: **FastAPI for API + AI + ingestion; React/Next SPA for frontend** (`[CONFIRM]`).
+**Python escape hatch:** ingestion/normalization may run as a separate `pipeline/` Python tool invoked from `scripts/` (local/CI), out of the edge request path — keeps strong PDF/ML libraries available without touching the API runtime.
+
+Type-safety across API⇄frontend via Hono RPC types (server route types inferred on the client) or shared `packages/schema` types.
 
 ### 3.2 Draft relational schema
 
-Single Postgres DB `[CONFIRM]` (add `pgvector`). ORM: **SQLModel** (official FastAPI full-stack template stack — typed, keeps schema + Pydantic validation in sync). Tenant columns `user_id`, `organization_id` on all user-created rows (Guardrail 1). MVP single soft-tenant (a default org), but columns present.
+Single **Cloudflare D1** database (SQLite, LOCKED; read-replication scales for the tester cohort). Access layer: `drizzle-orm` or typed raw SQL (build-phase pick) — SQLModel is Python-only and not used. Embeddings live in **Vectorize**, not in D1. Tenant columns `user_id`, `organization_id` on all user-created rows (Guardrail 1). MVP single soft-tenant (a default org), but columns present.
 
 ```
 users(id, email, display_name, role DEFAULT 'tester', created_at)
@@ -204,9 +207,9 @@ Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `st
 
 ### 3.5 Modular auth middleware
 
-- One wrapper in the API framework (FastAPI `Depends`/middleware or NextAuth) `[CONFIRM]`.
-- MVP: basic email/password (or magic link) sessions `[CONFIRM]`.
-- Contract: routes declare `requires_auth`; switching to SSO/enterprise = one module change, no per-route edits. (Guardrail 3.)
+- One Hono middleware wrapper in the API Worker (LOCKED).
+- MVP: basic email/password (or magic link) sessions `[CONFIRM]` build-phase detail.
+- Contract: routes declare `requires_auth`; switching to SSO/enterprise = one middleware change, no per-route edits. (Guardrail 3.)
 
 ---
 
@@ -214,11 +217,11 @@ Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `st
 
 ### 4.1 Stack
 
-- Framework: `[CONFIRM]` (default recommendation Next.js/React SPA).
-- Styling: **Tailwind CSS** (recommended; fast iteration, consistent design).
-- Components: **shadcn/ui** (pre-built, accessible, customizable) — recommended.
-- Data fetching/state: **React Query (TanStack Query)** (server-state standard) — recommended.
-- Charting: `[CONFIRM]` — candidates: **Recharts** (fast, React-native) vs **D3** (heavy) vs lightweight (visx). Default: Recharts-style declarative; D3 only if timeline needs bespoke.
+- Framework: **Next.js/React SPA** (LOCKED; optionally Vite SPA via Cloudflare Vite plugin — same components).
+- Styling: **Tailwind CSS** (LOCKED).
+- Components: **shadcn/ui** (LOCKED).
+- Data fetching/state: **React Query (TanStack Query)** (LOCKED).
+- Charting: **Recharts-style declarative** (LOCKED); D3 only if timeline demands bespoke.
 
 ### 4.2 Pages/components
 
@@ -262,9 +265,10 @@ Index notes: `documents(jurisdiction, published_at)`, `claims(document_id)`, `st
 
 ## 5. Deployment & Ops (MVP)
 
-- Hosting `[CONFIRM]`: default recommendation — a small VPS/free-tier PaaS (Fly.io/Render/Railway `[TBD]`) for API + DB; static/frontend hosting `[TBD]`.
-- Observability: structured logs + token.log → metric rollups; uptime not critical in testing window.
-- Cost budget: infra small; AI usage dominates → see 2.5 and `[CONFIRM]` ceiling.
+- Hosting **LOCKED: Cloudflare** — Workers (API) + Pages/Static Assets (frontend) / Worker Assets; D1, Vectorize, R2, Workers AI, AI Gateway all on the same account. No VPS/PaaS.
+- Observability: AI Gateway logs/metrics for AI; Worker logs + D1 analytics; structured logs + token cost rollups via AI Gateway. Uptime not critical in testing window.
+- CI: `wrangler deploy` via GitHub Actions (or Workers Builds); `.env.example` + `wrangler secret put` for keys.
+- Cost budget: infra ~$0 (free tiers); AI usage dominates → enforced by AI Gateway spend limits (§2.5 and `[CONFIRM]` ceiling).
 
 ## 5.5 Decision framework — how these defaults were derived
 
@@ -301,20 +305,20 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 | 2026-09-01 | **Q1:** source set = 13 MVP-core classes in 08-Sources.md | Coverage for all 3 capabilities with free/open APIs first; CourtListener's built-in citation checker directly supports the no-hallucination promise | Done (candidate set; licensing review pending in Phase 1) |
 | 2026-09-01 | Citations: claim → source span → URL, verification pass mandatory | The #1 differentiator vs generic AI (no fabricated refs); enforcement is in the pipeline, not the prompt | Done |
 
-### 6.2 Recommended defaults (awaiting [CONFIRM] — each with reasoning; framework in §5.5)
+### 6.2 Confirmed at M0 (2026-09-10) — each with rationale; framework in §5.5
 
 | # | Decision | Why this choice (rationale) | Alternative considered | Status |
 |---|---|---|---|---|
-| Q4 | Vector store: **Postgres + pgvector** | Run ONE database for relational + vectors; MVP corpus is small enough; zero extra service/ops; easy auth/tenant scoping in same queries; mature, well-documented extension. | Pinecone/Weaviate (managed vector): better at 10M+ vectors, but extra cost + data-egress complexity now | Recommended |
-| Q2 | **Haiku-class LLM for extraction, flagship for synthesis** | Extraction (stances, events, metadata) is high-volume → cheap model; synthesis shown to users → flagship; balances the free-tester cost ceiling (Q3). | Single flagship everywhere: simplest but cost-prohibitive at scale | Recommended |
-| Q3 | **Cost ceiling `[TBD]`** — soft alert 80%, hard pause 100% | Free product needs a guard so testers can't bankrupt the build; alerts precede surprise. | No limit: risky for a free prototype | Recommended (value TBD) |
-| Q6 | API: **FastAPI (Python)** + React/Next SPA | Same language as ingestion/LLM ecosystem; typed; async; pairs with pgvector; separates heavy AI from UI. | Next.js API routes: one language for UI too, but couples AI logic to the web server | Recommended |
-| Q5 | Hosting: small PaaS/VPS `[TBD]` (Fly.io/Render/Railway) | Cheap, fast deploys, enough for testing window; no infra hobby. | Self-managed VPS: more control, more upkeep | Recommended (value TBD) |
-| Q7 | Charting: **Recharts-style declarative**; D3 only if timeline demands | Pro/Con dashboard + timeline are standard charts; declarative lib is fast to ship and React-native; D3 is heavy and slower to build. | D3: full control, but overkill for MVP views | Recommended |
-| 2.1 | Retrieval: **hybrid dense + BM25** (rerank optional) | Dense embeddings catch semantics; BM25 catches exact citations/numbers; combined recall protects citation-groundedness. | Dense-only: simplest, misses exact-match edge cases | Recommended |
-| 2.2 | Generation: **retrieve → grounded generation with span anchors**; never free-form beyond retrieved spans | Structural guarantee of truthfulness; UI renders `[n]`→span→URL. | Agentic open search: flexible but unpredictable citations | Done (pattern locked) |
-| 3.2 | ORM: **SQLModel** (official FastAPI full-stack template) | Standard, typed; keeps schema + Pydantic validation in sync. | Raw SQL: more control, less safety/verbosity | Recommended (build-phase decision) |
-| 4.1 | Frontend conventions: **Tailwind + shadcn/ui + React Query** | Mature, documented, widely used UI stack; declarative and fast to build/debug. | Custom CSS / bespoke state: slower, less discoverable | Recommended |
+| Q4 | Vector store: **Cloudflare Vectorize** (+ D1 for relational) | GA, globally distributed, ~$0 within free tier for MVP corpus; single platform for embeddings + queries, no egress; native Worker binding. Scale path: pgvector/Pinecone if corpus outgrows. | Postgres+pgvector: fine but spins up managed PG; D1 covers relational data + tenant scoping | **Done** |
+| Q2 | **Claude (Anthropic) — Sonnet-class for synthesis, Haiku-class for extraction; embeddings bge-m3 via Workers AI** | Best structured-JSON reliability for the claims/citations contract; no long-context surcharge; -90% prompt caching. Cheap embeddings stay in-platform. Concrete model IDs + key `[TBD]` (owner). | Bare Workers AI open models for synthesis: cheap but weaker instruction-following for citation JSON | **Done** |
+| Q3 | **Cost ceiling via AI Gateway spend limits** — soft alert 80%, hard block 100% | AI Gateway provides dollar-based budgets scoped by provider/model; one config block instead of custom code. Ceiling value `[TBD]` (owner). | No limit: risky for a free prototype | **Done (value TBD)** |
+| Q6 | API: **Hono (TypeScript) on Cloudflare Workers** | Edge-native, ~$0, native bindings, one language across frontend+API+pipeline; matches operator's proven stack. | FastAPI (VPS or Python Workers): constrains to paid infra or beta WASM runtime | **Done** |
+| Q5 | Hosting: **Cloudflare** (Workers/Pages, D1, Vectorize, R2, Workers AI, AI Gateway) | Free tiers cover MVP; scaling = hand off to the edge; zero infra hobby. | Fly.io/Render/Railway VPS: paid, manually scaled, outside operator's skill stack | **Done** |
+| Q7 | Charting: **Recharts-style declarative** | Pro/Con dashboard + timeline are standard charts; declarative lib is fast to ship and React-native. | D3: full control, overkill for MVP views | **Done** |
+| 2.1 | Retrieval: **hybrid dense + keyword fallback** (rerank optional via bge-reranker-base) | Dense embeddings catch semantics; keyword catches exact citations/numbers; combined recall protects citation-groundedness. | Dense-only: simplest, misses exact-match edge cases | **Recommended** |
+| 2.2 | Generation: **retrieve → grounded generation with span anchors**; never free-form beyond retrieved spans | Structural guarantee of truthfulness; UI renders `[n]`→span→URL. | Agentic open search: flexible but unpredictable citations | **Done (pattern locked)** |
+| 3.2 | DB access: **Drizzle-ORM or typed raw SQL** (build-phase pick) | No Python ORM in a TS stack; typed schema + migrations for D1. | SQLModel: Python-only, not applicable on Workers | **Recommended (build-phase)** |
+| 4.1 | Frontend conventions: **Tailwind + shadcn/ui + React Query** | Mature, documented, widely used UI stack; declarative and fast to build/debug. | Custom CSS / bespoke state: slower, less discoverable | **Done** |
 
 ### 6.3 Open (deferred)
 
@@ -324,15 +328,15 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 | — | Q9 launch date / testing window | Needs schedule decision |
 | — | Q10 time-saved target metric (e.g. ≥X%) | Needs baseline data from a small dry-run |
 
-## 7. Confirmed decisions checklist (mirrors 05-Risks Q list)
+## 7. Decisions checklist (mirrors 05-Risks Q list)
 
 - [x] Q1 source list ✅ (13 MVP-core classes; see 08-Sources.md — licensing review pending in Phase 1)
-- [ ] Q2 LLM + embedding providers (recommended: Haiku-class + flagship split — pick concrete providers)
-- [ ] Q3 AI cost ceiling (recommended: alerts at 80% / pause at 100%; set a number)
-- [ ] Q4 vector store (recommended: Postgres + pgvector — next: pin pgvector version/setup)
-- [ ] Q5 hosting provider (recommended: Fly.io/Render/Railway — pick one)
-- [ ] Q6 API framework (recommended: FastAPI + React/Next SPA — locked unless you object)
-- [ ] Q7 frontend + charting (recommended: Next.js + Tailwind + shadcn/ui + React Query + Recharts)
+- [x] Q2 LLM + embedding providers ✅ (Anthropic Claude Sonnet/Haiku + Workers AI bge-m3; **concrete model IDs + key rotation pending**)
+- [ ] Q3 AI cost ceiling ✅ mechanism (AI Gateway spend limits: soft 80% / hard 100%) — **ceiling value TBD**
+- [x] Q4 vector store ✅ (Cloudflare Vectorize)
+- [x] Q5 hosting provider ✅ (Cloudflare — Workers/Pages/D1/Vectorize/R2/Workers AI/AI Gateway)
+- [x] Q6 API framework ✅ (Hono + TypeScript on Cloudflare Workers)
+- [x] Q7 frontend + charting ✅ (Next.js/Vite React + Tailwind + shadcn/ui + React Query + Recharts)
 - [ ] Q8 tester cohort
 - [ ] Q9 launch date/window
 - [ ] Q10 time-saved target metric

@@ -4,16 +4,16 @@ Status: Draft
 Owner: [Kaia]
 Last updated: 2026-09-01
 
-Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimates are day-effort units for a solo/small build (`[CONFIRM]` sizing). Owners default to [Kaia].
+Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimates are day-effort units for a solo/small build (revised 2026-09-10 for Cloudflare stack). Owners default to [Kaia].
 
 ## Phase 0 — Foundation & Setup (Estimates: 3–5d)
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 0.1 | Confirm MVP tech stack per 07-Architecture (resolve all `[CONFIRM]` items) | Kaia | 1d | — |
+| 0.1 | ~~Confirm MVP tech stack~~ ✅ **DONE (2026-09-10)** — locked: Hono/TS Workers API; Next/Vite React frontend; D1 + Vectorize + R2; Workers AI (bge-m3) + Anthropic Claude; AI Gateway spend limits; hosting = Cloudflare (see 07-Architecture §6.2) | Kaia | 1d | — |
 | 0.2 | Init git repo + GitHub; branch strategy (main + feature) | Kaia | 0.5d | 0.1 |
-| 0.3 | Repo scaffolding: monorepo layout (`app/`, `api/`, `pipeline/`), lint/format, CI basics | Kaia | 1d | 0.2 |
-| 0.4 | Secrets setup (.env pattern, `.env.example`, guard rails; verify nothing secrets committed) | Kaia | 0.5d | 0.3 |
+| 0.3 | Repo scaffolding: pnpm workspace (`apps/web`, `apps/api`, `packages/`, `pipeline/`), lint/format, wrangler config, CI basics | Kaia | 1d | 0.2 |
+| 0.4 | Secrets setup (`.env.example`, `wrangler secret put` pattern, guard rails; **rotate leaked prod key per R10**; verify nothing committed) | Kaia | 0.5d | 0.3 |
 | 0.5 | Tenant-scoping convention documented + schema template (all user tables carry `user_id`/`org_id`) | Kaia | 0.5d | 0.1 |
 
 ## Phase 1 — Data & Access Layer (Estimates: 4–6d)
@@ -23,7 +23,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 | 1.1 | Finalize source list: MVP-core set from 08-Sources.md (13 classes); fallback to MVP-extend only if needed | Kaia | 1d | 0.1 |
 | 1.2 | Source licensing/terms review per 08-Sources licensing questions (what can be stored vs link-only) | Kaia | 1d | 1.1 |
 | 1.3 | API/integration spike per source (Congress.gov/GovInfo, journal APIs, court filings) | Kaia | 2d | 1.1 |
-| 1.4 | Auth middleware wrapper selected + stubbed (NextAuth / FastAPI middleware) | Kaia | 1d | 0.2 |
+| 1.4 | Auth middleware wrapper implemented in Hono (single middleware; email/password or magic link sessions) | Kaia | 1d | 0.2 |
 
 ## Phase 2 — Ingestion & Indexing (Estimates: 6–8d)
 
@@ -90,9 +90,9 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 | 8.3 | Deploy + free-tier hosting check (`[CONFIRM]` provider) | Kaia | 1d | 8.1 |
 | 8.4 | Tester launch + metrics dashboard live | Kaai | 0.5d | 8.3 |
 
-**Totals:** 8 phases, ~46–68d effort (solo build path). Sizing `[CONFIRM]` — revisit after stack decisions.
+**Totals:** 8 phases, ~46–68d effort (solo build path). Re-baseline after Cloudflare stack lock (2026-09-10): infra-adjacent tasks (0.3–0.5, 2.4, 8.3) shrink; AI/citation core (Phase 3) unchanged.
 
 ## Open WBS decisions
-- 0.1 stack confirmation gates Phases 1–3 estimates.
+- 0.1 stack is confirmed (2026-09-10); Phases 1–3 estimates reflect the Cloudflare/Workers stack.
 - 7.x assumes single-owner recruitment; adjust if a second person joins.
-- 8.3 deploy provider drives cost/ops notes in 05–06.
+- 8.3 deploy = Cloudflare (wrangler); free-tier hosting check at release.
