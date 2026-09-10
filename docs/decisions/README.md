@@ -26,6 +26,20 @@ For every future build decision, append a dated entry with status, decision, rat
 | D016 | Validate repeat use for real research tasks; weekly use is acceptable when the underlying work is not daily. | Adoption should match actual research cadence. No numeric retention, time-saved, or useful-answer-rate threshold has been approved. | PRD, Risks |
 | D017 | Maintain this decision log whenever a build decision is made. | Preserve reasoning across sessions and keep the specifications aligned. Separate accepted decisions from proposals and unresolved questions. | AGENTS, README |
 
+## September 10, 2026 — Repository workflow
+
+### D018 — One repository for code and project context (approved)
+
+Keep application code, ingestion, planning documents, and decision history in APEX. A single change can carry implementation, reasoning, and validation together; separate repositories would add coordination work without a current access or release-boundary requirement. The planned apps/packages layout remains unchanged.
+
+### D019 — Project-wide Superpowers defaults, scoped by task (approved)
+
+Use installed Superpowers skills by default throughout the repository. Root `AGENTS.md` maps features, architecture, debugging, testing, reviews, and completion to the appropriate skills. Routine documentation changes use lightweight consistency checks instead of code-testing ceremony. This preserves disciplined engineering while avoiding unnecessary process for prose edits. Existing user approvals remain valid.
+
+Superpowers is an environment dependency, already available in the current session; this repository contains workflow instructions rather than a vendored plugin or machine-specific cache paths. New collaborators need the skills available in their agent environment. This change configures agent workflow only; application scaffolding (WBS 0.3) remains pending.
+
+Affected files: `AGENTS.md`, `README.md`, and this log.
+
 ## Proposed details and open decisions
 
 - Pilot organization/contact, policy issue, jurisdictional coverage, first research task, and exact output: open pending outreach.

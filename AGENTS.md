@@ -6,6 +6,29 @@ APEX (**Applied Policy & Evidence Exchange**) is an AI-powered B2B/B2G SaaS that
 
 **Core promise:** every AI-generated claim must render a verifiable sentence-level source citation. No hallucinated citations. Ever.
 
+## Default agent workflow — Superpowers
+
+Apply these defaults across this entire repository: application code, ingestion, configuration, architecture, planning, and documentation. Keep code and project context in this one repository. More specific directory instructions may extend these defaults without weakening APEX guardrails.
+
+Use the installed `superpowers` skills through the current environment's skill discovery mechanism. Read the applicable skill before applying it; do not hard-code a developer's plugin-cache path or copy plugin internals into this repository. Start sessions with `superpowers:using-superpowers`. If required skills are unavailable, report the missing dependency and follow the documented workflow as far as possible without claiming the skill ran.
+
+| Work | Default workflow |
+|---|---|
+| New features, behavior, or architecture | `superpowers:brainstorming` to clarify intent and review the design; `superpowers:writing-plans` for approved multi-step implementation. Reuse decisions already approved in the session. |
+| Executing an approved plan | `superpowers:executing-plans`, or `superpowers:subagent-driven-development` when independent tasks and available agent tools justify delegation. |
+| Feature or bugfix implementation | `superpowers:test-driven-development` for meaningful behavior tests, then implementation and relevant checks. |
+| Bugs, failures, unexpected behavior | `superpowers:systematic-debugging` before proposing a fix. |
+| Review | `superpowers:requesting-code-review` for substantial implementation; `superpowers:receiving-code-review` when responding to feedback. |
+| Isolated feature work | `superpowers:using-git-worktrees` when isolation is needed; recognize an existing isolated checkout. |
+| Completing code work | `superpowers:verification-before-completion`, then `superpowers:finishing-a-development-branch` when integration is needed. Report actual checks and remaining limitations. |
+| Routine planning/documentation edits | Direct edits, decision-log updates, consistency/link checks, and `git diff --check`. No code tests or elaborate design cycle solely for prose changes. Substantive new architecture decisions still use brainstorming. |
+
+Use parallel agents only for concrete independent tasks when useful local work can continue. Follow the current environment's tool and permission rules. Do not require delegation for routine edits.
+
+Scale the process to the task. Explicit user instructions and existing authorization take precedence over skill defaults; do not repeatedly seek approval for an already approved design or routine reversible work. Repository instructions do not grant blanket permission to publish, deploy, spend money, or send messages.
+
+Every build decision must be recorded in [the decision log](docs/decisions/README.md) with its rationale and status, and reflected in affected specifications. Keep proposals and unresolved questions visibly separate from accepted decisions.
+
 ## Tech stack (locked, M0 — 2026-09-10)
 
 | Layer | Technology |

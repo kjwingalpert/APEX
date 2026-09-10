@@ -45,3 +45,9 @@ Build a functional web prototype that proves AI can automatically aggregate, syn
 - [x] Git repo initialized + GitHub live ([kjwingalpert/APEX](https://github.com/kjwingalpert/APEX))
 - [ ] Repo scaffolded (WBS 0.3)
 - [ ] MVP built and user-testing-ready
+
+## Agent workflow
+
+[AGENTS.md](AGENTS.md) applies Superpowers defaults across code, architecture, and project documentation. Install or enable the Superpowers skills in your agent environment; the repository does not vendor the plugin or depend on a personal cache path. Code changes use the relevant design, testing, review, and verification workflows; routine documentation edits use lightweight consistency checks.
+
+Record every build decision and its rationale in the [decision log](docs/decisions/README.md). Keep code and planning in this repository so they can be reviewed together.
