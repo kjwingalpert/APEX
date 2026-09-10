@@ -2,7 +2,7 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-01
+Last updated: 2026-09-10
 
 ## Top Risks
 
@@ -34,14 +34,46 @@ Last updated: 2026-09-01
 |---|---|---|
 | Q1 | ~~Exact source list?~~ ✅ **Resolved** — 13 MVP-core classes confirmed; see [08-Sources.md](08-Sources.md). Licensing/redistribution review is WBS Phase 1 (1.2). | Done |
 | Q2 | ~~LLM providers + embedding provider?~~ ✅ **Resolved (2026-09-10)** — Anthropic Claude: Sonnet-class for synthesis, Haiku-class for extraction; embeddings = Workers AI `bge-m3`. Concrete model IDs/key rotation pending (owner). | Done |
-| Q3 | ~~Monthly AI cost ceiling?~~ ✅ **Mechanism resolved (2026-09-10)** — Cloudflare AI Gateway spend limits: soft alert 80%, hard block 100%. **Numeric ceiling still TBD (owner).** | Partial |
+| Q3 | ~~Monthly AI cost ceiling?~~ ✅ **Mechanism resolved (2026-09-10)** — Cloudflare AI Gateway spend limits: soft alert 80%, hard block 100%. **Owner approved $100/month total pilot operating allowance (2026-09-10).** AI-only allocation and enforcement configuration remain TBD. | Partial |
 | Q4 | ~~Vector store?~~ ✅ **Resolved** — Cloudflare Vectorize (GA). | Done |
 | Q5 | ~~Deploy/hosting provider?~~ ✅ **Resolved** — Cloudflare (Workers + Pages, D1, Vectorize, R2, Workers AI, AI Gateway). | Done |
 | Q6 | ~~Backend framework?~~ ✅ **Resolved** — Hono + TypeScript on Cloudflare Workers. | Done |
 | Q7 | ~~Frontend + charting?~~ ✅ **Resolved** — Next.js/Vite React + Tailwind + shadcn/ui + React Query + Recharts. | Done |
-| Q8 | Tester cohort: who, how many, sign-up channel? | Product decision |
-| Q9 | Target launch date + testing window length? | Schedule decision |
-| Q10 | Success metric target: e.g. ≥ `[CONFIRM]`% claimed time saved? | Product decision |
+| Q8 | First pilot organization/contact in Los Angeles, policy issue, cohort size, and sign-up channel? Owner needs to speak with a prospective organization first. | Open — owner outreach by September 24, 2026; grilling Q6 |
+| Q9 | Shipping deadline: **November 3, 2026**, independent of an election-related workflow. Pilot start and testing window remain open. | Deadline resolved; testing window TBD |
+| Q10 | Repeat use for real research tasks; weekly use is acceptable when research is not daily. Cohort, observation window, retention threshold, and time-saved target remain TBD. | Direction resolved; numeric criteria open |
+| Q11 | First research task and output: question answer, literature summary, cited brief, or another deliverable? Resolve with the pilot organization before fixing corpus and workflow scope. | Open — owner discovery; grilling Q7 |
+
+## Remaining discovery questions
+
+- Tester document uploads versus owner-managed ingestion remain open (grilling Q19).
+- Export format and whether copyable cited text is sufficient remain open (grilling Q20).
+- Numeric useful-answer-rate thresholds are deferred; the proposed 16/20 threshold was not adopted (grilling Q22).
+- Usage tracking is requested for planning: sign-ins, research requests, repeat use, citation clicks, feedback, and estimated AI cost. Proposed analytics omit private question/answer text; retention and implementation remain to be decided.
+
+## Owner decisions — grilling session, 2026-09-10
+
+- Evidence quality takes precedence over the shipping date: reduce coverage or delay the pilot if material unsupported claims remain.
+- First release prioritizes research synthesis. Stance Tracker and Action Tracer are later priorities; existing all-three release gates in the scope and acceptance docs need reconciliation before implementation planning.
+- Evidence verification must check that the source supports the claim, including qualifications and context, not merely that the citation exists. Withhold unsupported claims.
+- Quality assurance combines domain review of real question/answer samples with layered automated checks. Reviewer identity, evaluation thresholds, and exact checks remain open; more checks alone do not establish accuracy.
+- Owner availability: **10 hours per week**, approximately **77 hours** from September 10 to November 3. Allocate time for outreach, evidence review, and feedback as well as development.
+- November 3 is a shipping deadline, not a requirement to support an election-specific task.
+- When evidence is insufficient, return supported partial findings and explicitly identify evidence gaps; do not fill gaps with unsupported claims.
+- Owner will speak with a potential pilot organization within the next two weeks, by September 24, 2026.
+- First release answers from a curated collection with visible coverage and dates. Live-web discovery is deferred.
+- Synthesis must present credible conflicting evidence and relevant limitations, including findings that weaken the user's preferred argument.
+- Tester questions and saved research are private by default; public source documents may be shared. A single shared organization must not expose individual research to other testers.
+- When the approved operating allowance is exhausted, stop new AI requests while keeping existing research accessible. Alert before exhaustion; additional spending requires an owner decision. Enforcement must account for non-AI operating costs and reserve enough budget for continued read access; the exact allocation and mechanism remain implementation decisions.
+
+## Approved pilot operating allowance — September 10, 2026
+
+- Owner-approved operating allowance: **$100/month**, with an estimated **$50–100/month** for a small, curated pilot. This is an estimate, not a configured spending limit.
+- Assumptions: approximately five testers, 500 synthesis requests/month, bounded retrieved context, one synthesis and one evidence-check pass per request, and a modest seed corpus.
+- Allow $5–15/month for Cloudflare hosting/storage/retrieval, $30–60 for generation and verification, and $15–25 for ingestion, evaluation runs, and contingency.
+- Conservative token assumption: 20,000 aggregate input tokens and 2,000 aggregate output tokens across both passes per request. At a planning rate of $3/million input and $15/million output, 500 requests cost approximately $45. Actual costs depend on selected models, context size, retries, and evaluation volume.
+- Excludes paid source licenses, domain registration, development-tool subscriptions, and human reviewer time. Confirm commercial source access before depending on it.
+- Pricing references checked September 10: [Cloudflare Workers](https://developers.cloudflare.com/workers/platform/pricing/), [Anthropic pricing](https://claude.com/pricing). Concrete model IDs, AI-only allocation, and enforcement configuration remain unresolved (Q2/Q3).
 
 ## Risk reviews
 
