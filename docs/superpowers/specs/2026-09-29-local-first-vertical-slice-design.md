@@ -1,5 +1,7 @@
 # APEX Local-First Vertical Slice Design
 
+Architecture diagram: [APEX platform architecture](../../architecture/README.md)
+
 Status: Approved design
 
 Date: 2026-09-29

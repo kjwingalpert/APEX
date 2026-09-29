@@ -1,0 +1,104 @@
+flowchart TB
+    subgraph Workflow["1 · Research workflow"]
+        direction LR
+        Researcher["Researcher"] --> Web["React web app"]
+        Web -->|"query + filters"| API["Hono API"]
+        API --> Auth["Authenticate and<br/>apply user scope"]
+    end
+
+    subgraph Engine["2 · APEX evidence engine"]
+        direction LR
+        Orchestrate["Research-session<br/>orchestrator"] --> Retrieve{{"Retrieval<br/>provider"}}
+        Retrieve --> Rank["Ranked evidence<br/>results"]
+        Rank --> Synth{{"Synthesis<br/>provider"}}
+        Synth --> Integrity["Citation-integrity<br/>check"]
+        Integrity --> Support["Claim-support<br/>check"]
+        Support --> Gate{"Checks<br/>pass?"}
+        Gate -->|"yes"| Verified["Verified synthesis"]
+        Gate -->|"no"| Gap["Withhold claim and<br/>show evidence gap"]
+    end
+
+    subgraph Ingestion["3 · Owner-managed evidence ingestion"]
+        direction LR
+        Sources["Approved sources"] --> Manifest["Source manifest<br/>URL · access · reuse · type"]
+        Manifest --> Eligible{"Eligible and<br/>accessible?"}
+        Eligible -->|"full text"| Normalize["Normalize and hash<br/>immutable version"]
+        Normalize --> Chunk["Stable passages"]
+        Chunk --> Index["Index passages"]
+        Eligible -->|"metadata only"| Metadata["Searchable metadata<br/>excluded from synthesis"]
+        Eligible -->|"fails rules"| Reject["Reject with reason"]
+    end
+
+    subgraph Records["4 · Data boundaries"]
+        direction LR
+        Corpus[("Public corpus<br/>sources · versions · passages")]
+        Private[("Private research records<br/>sessions · claims · citations · saves")]
+        Objects[("Permitted source files")]
+    end
+
+    subgraph Local["Build now · no Cloudflare account required"]
+        direction LR
+        Runtime["Wrangler + workerd"]
+        Keyword["Keyword retrieval"]
+        Extractive["Deterministic<br/>extractive synthesis"]
+        LocalD1[("Local D1")]
+        LocalR2[("Local R2")]
+    end
+
+    subgraph Future["Swap in after USC IT approval"]
+        direction LR
+        Vectorize[("Vectorize")]
+        WorkersAI["Workers AI<br/>embeddings"]
+        Gateway["AI Gateway"]
+        Claude["Claude grounded<br/>synthesis"]
+        RemoteD1[("Cloudflare D1")]
+        RemoteR2[("Cloudflare R2")]
+    end
+
+    Auth --> Orchestrate
+    Rank --> Web
+    Verified --> Web
+    Gap --> Web
+
+    Index --> Corpus
+    Metadata --> Corpus
+    Normalize --> Objects
+    Retrieve --> Corpus
+    Rank --> Private
+    Verified --> Private
+    Gap --> Private
+
+    Runtime --> API
+    Keyword --> Retrieve
+    Extractive --> Synth
+    Corpus --> LocalD1
+    Private --> LocalD1
+    Objects --> LocalR2
+
+    Vectorize -. "retrieval provider" .-> Retrieve
+    WorkersAI -. "embeddings" .-> Vectorize
+    Gateway -.-> Claude
+    Claude -. "synthesis provider" .-> Synth
+    Corpus -. "same schema" .-> RemoteD1
+    Private -. "same schema" .-> RemoteD1
+    Objects -. "same object contract" .-> RemoteR2
+
+    classDef user fill:#ede9fe,stroke:#6d28d9,color:#2e1065,stroke-width:2px;
+    classDef interface fill:#e0f2fe,stroke:#0369a1,color:#082f49;
+    classDef api fill:#dbeafe,stroke:#1d4ed8,color:#172554;
+    classDef engine fill:#fef3c7,stroke:#b45309,color:#451a03;
+    classDef success fill:#dcfce7,stroke:#15803d,color:#14532d;
+    classDef danger fill:#fee2e2,stroke:#b91c1c,color:#450a0a;
+    classDef storage fill:#ecfccb,stroke:#4d7c0f,color:#1a2e05;
+    classDef future fill:#f3f4f6,stroke:#6b7280,color:#111827,stroke-dasharray:5 5;
+    classDef process fill:#f8fafc,stroke:#475569,color:#0f172a;
+
+    class Researcher user;
+    class Web interface;
+    class API,Auth api;
+    class Orchestrate,Retrieve,Rank,Synth,Integrity,Support,Gate engine;
+    class Verified success;
+    class Gap,Reject danger;
+    class Corpus,Private,Objects,LocalD1,LocalR2 storage;
+    class Vectorize,WorkersAI,Gateway,Claude,RemoteD1,RemoteR2 future;
+    class Sources,Manifest,Eligible,Normalize,Chunk,Index,Metadata,Runtime,Keyword,Extractive process;
