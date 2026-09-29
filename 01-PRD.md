@@ -2,7 +2,7 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
@@ -24,6 +24,8 @@ APEX exists to help answer all three faster and with verifiable evidence.
 
 **Primary:** Non-profit researchers and policy teams at small advocacy organizations.
 
+**First validation user:** Aging & Cognition Research Group, USC Leonard D. Schaeffer Institute for Public Policy & Government Service. This approximately 20-person interdisciplinary program studies the health, economic, and social effects of dementia and chronic disease. It will validate the evidence-research workflow. Because it is an academic research group rather than the primary nonprofit customer segment, its feedback does not by itself validate nonprofit adoption or purchasing needs. See the [validation-user profile](docs/research/2026-09-29-aging-cognition-validation-user-profile.md).
+
 **Who they answer to:** legislators and staffers they lobby, expert testimony panels, regulatory comment dockets, and coalition partners.
 
 **Jobs to be done (MVP validation targets):**
@@ -32,6 +34,16 @@ APEX exists to help answer all three faster and with verifiable evidence.
 - Drive evidence-based coalition building.
 
 **Success = measurable time saved on these workflows** versus manual research and generic AI.
+
+## Feature → researcher need
+
+| Feature | Researcher’s need |
+|---|---|
+| Research synthesis — MVP | What do the included studies find, and where do findings agree or conflict? |
+| Stance Tracker — later | Which people or organizations support or oppose this issue, based on what statements or actions, and when? |
+| Decision Tracer — later | What policy, regulatory, or judicial decisions happened, and how did they evolve? |
+
+Scientific agreement or disagreement concerns research findings; actor stances concern positions on an issue. Both require evidence, but they are distinct outputs.
 
 ## 3. Core Capabilities (MVP)
 
@@ -83,3 +95,17 @@ APEX exists to help answer all three faster and with verifiable evidence.
 See [02-MVP-Scope.md](02-MVP-Scope.md).
 
 Open items are surfaced in [05-Risks.md](05-Risks.md).
+
+## Keyword research workflow — confirmed September 10, 2026
+
+- Primary input is keywords. Return related documents and an overall synthesis of the included research; opening a document provides its own evidence-backed synthesis.
+- Both synthesis levels require claim-support checks and clickable supporting paragraphs. Show included documents, coverage, dates, and limitations rather than implying the results represent all research.
+- Abstract-only records can appear in results with clear access labels. Only accessible full text contributes to synthesis initially; insufficient coverage must be explicit. Do not fabricate a full-document synthesis for an abstract-only record.
+- Researchers can save papers to a private library and download papers where source permissions allow; otherwise link to the source access page. Synthesis export format and tester uploads remain open.
+- Stance Tracker remains a later capability: keyword searches identify people's and organizations' positions on an issue, supported by dated evidence. This is distinct from agreement/disagreement among scientific findings.
+- Decision/Action Tracer remains a later capability tracking policy, regulatory, and judicial developments. Reuse document identity, versioning, provenance, and source passages across future capabilities without building their extraction or UI now.
+
+
+## Evidence eligibility — approved September 11, 2026
+
+Research synthesis admits two clearly labeled categories: peer-reviewed research and institutional research with documented methods, data provenance, limitations, and an identifiable review process. Offer a peer-reviewed-only filter. Assess eligibility per document, not merely by API or publisher name. Institutional review is distinct from external journal peer review. Both categories still require accessible full text and evidence-support checks. Government actions and actor statements are separate evidence for future tracers, not automatically research studies. See decision D024.

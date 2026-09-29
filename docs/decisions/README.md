@@ -56,3 +56,65 @@ Affected files: `AGENTS.md`, `README.md`, and this log.
 ## Budget reasoning
 
 The $100/month allowance was accepted after discussing a small-pilot estimate: roughly five testers and 500 synthesis requests/month, $5–15 for hosting/storage/retrieval, $30–60 for synthesis/checks, and $15–25 for ingestion/evaluation/contingency. These are assumptions, not cohort commitments or vendor quotes. Paid data licenses, domain registration, development subscriptions, and human reviewer time are excluded. See `05-Risks.md` for token assumptions and pricing references.
+
+
+## September 10, 2026 — Research interaction decisions
+
+### D020 — Keywords and two synthesis levels (approved)
+
+Keyword searches return related papers and an overall synthesis of included evidence; opening a paper provides a document-specific synthesis. Both expose exact supporting paragraphs and evidence checks. Rationale: match how the owner expects researchers to search while supporting both discovery and close reading. Question-first interaction is superseded as the primary flow. Display scope and included documents to avoid implying comprehensive coverage of all research.
+
+### D021 — Full-text evidence for initial synthesis (approved)
+
+Abstract-only records may appear in search results but are excluded from synthesis initially. Label access and explain insufficient full-text coverage. Rationale: abstracts omit methods and limitations needed for faithful interpretation. Tradeoff: fewer papers may contribute; coverage must be visible.
+
+### D022 — Private saved papers and permitted downloads (requested MVP behavior)
+
+Researchers can save papers privately and download where permissions allow, otherwise follow the source access link. Rationale: finding evidence should lead to retaining and reading useful papers. Free API access alone does not establish redistribution rights. Synthesis exports and uploads are separate open decisions.
+
+### D023 — Preserve the future stance and decision features (confirmed roadmap)
+
+After synthesis, keyword searches should support evidence-backed positions of people and organizations and a decision/action history. Rationale: these address support and policy evolution in APEX's mission. Reuse stable document versions and passage citations, but defer stance/event extraction and UI. Scientific disagreement in synthesis is not itself an actor's policy stance.
+
+Affected specifications for D020–D023: PRD, MVP Scope, Architecture, Acceptance Criteria. Detailed implementation and revised estimates remain pending.
+
+
+## September 11, 2026 — Evidence eligibility
+
+### D024 — Two labeled evidence categories (approved)
+
+Admit peer-reviewed research and separately labeled institutional research. Provide a peer-reviewed-only filter. Institutional reports require documented methods, data provenance, limitations, and an identifiable review process; institutional review must not be mislabeled as external journal peer review. Peer-reviewed studies still require evidence assessment. Rationale: include useful policy research such as Pew-style reports without weakening or obscuring the review standard. Full-text-only synthesis remains in force. Record eligibility at document level; API inclusion alone does not qualify a document. Detailed review workflow remains to be designed.
+
+The September 11 infrastructure assessment is a recommendation, not approval to add Kafka, Docker, Kubernetes, GraphQL, gRPC, WebSockets, Redis, or additional Cloudflare services. See `docs/research/2026-09-11-source-and-infrastructure-review.md`.
+
+
+### D025 — Indexed MVP, live discovery later (approved September 11, 2026)
+
+Populate a versioned, searchable collection from selected APIs before user searches. Prioritize popular topics and adjust coverage based on user interest; defer live API discovery during searches. Rationale: reuse document preparation, make evidence review repeatable, and reduce request-time dependencies within the pilot budget. Tradeoff: coverage is bounded and freshness depends on refreshes; display both explicitly. Popularity determines which topics to cover, not which conclusions qualify for inclusion. Apply the same evidence eligibility rules to supporting and conflicting findings. Initial topics, demand measurement, refresh cadence, and expansion thresholds remain open. This resolves the indexed-versus-live discovery question and refines D013.
+
+Affected documents: MVP Scope, Architecture, Sources, Risks, Acceptance Criteria.
+
+
+### D026 — Show document results before synthesis (approved September 11, 2026)
+
+Display document results as soon as retrieval completes, without waiting for synthesis. Researchers can browse and open papers while synthesis is prepared and checked. Show synthesis progress separately and render substantive claims only after verification. Rationale: keep research usable during generation without exposing unchecked output. Search completion does not guarantee instantaneous response. A synthesis failure must not remove successful search results. Initial topics remain open pending partner discussion.
+
+Affected documents: MVP Scope, Architecture, Acceptance Criteria.
+
+
+## September 29, 2026 — First validation user
+
+### D027 — Aging & Cognition Research Group is the first validation user (approved)
+
+Use the Aging & Cognition Research Group at the USC Leonard D. Schaeffer Institute for Public Policy & Government Service as APEX's first user for workflow discovery and prototype testing. The contact is one of its lead researchers; the name remains to be recorded. This supersedes the first-user portion of D007, which assumed the initial pilot would be a nonprofit or small organization in Los Angeles. The research group is a strong setting for testing source discovery, synthesis, citation verification, and researcher trust, but it does not by itself validate adoption or purchasing needs in APEX's primary nonprofit customer segment. Record its named contact, real research task, topic, participant count, and session date before fixing the pilot corpus. Detailed owner-provided discovery notes are in `docs/research/2026-09-29-aging-cognition-validation-user-profile.md`.
+
+Affected documents: PRD, WBS, Risks, decision log.
+
+
+### D028 — Build a local-first vertical slice before Cloudflare access (approved)
+
+Build the first complete APEX evidence path locally with Wrangler/workerd, local D1, local R2, deterministic keyword retrieval, and extractive synthesis. Keep retrieval and synthesis behind provider interfaces so Vectorize and Anthropic through AI Gateway can replace the local providers without changing application contracts. Use 5–10 accessible documents about new and repurposed Alzheimer's drugs as the representative seed collection. This lets the team implement and test provenance, tenant isolation, retrieval, citation resolution, withholding, and interface states while USC IT approval for Cloudflare Workers remains pending. It does not authorize production deployment or treat local retrieval and synthesis quality as equivalent to the remote services.
+
+Design: `docs/superpowers/specs/2026-09-29-local-first-vertical-slice-design.md`.
+
+Affected documents: Architecture design, Risks, WBS, decision log.

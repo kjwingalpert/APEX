@@ -40,7 +40,7 @@ Build a functional web prototype that proves AI can automatically aggregate, syn
 ## Status
 
 - [x] Planning docs drafted
-- [x] Architecture decisions confirmed (M0 locked, 2026-09-10 — see 07-Architecture.md §6.2)
+- [x] M0 architecture decisions confirmed (2026-09-10 — see 07-Architecture.md §6.2); M0 implementation remains incomplete
   - [ ] Remaining `[TBD]`: AI allocation/enforcement within $100/month, concrete model IDs/key rotation, build-phase picks (WBS 0.x + Phase 1)
 - [x] Git repo initialized + GitHub live ([kjwingalpert/APEX](https://github.com/kjwingalpert/APEX))
 - [ ] Repo scaffolded (WBS 0.3)

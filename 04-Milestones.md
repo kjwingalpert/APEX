@@ -2,13 +2,13 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
 Shipping target is November 3, 2026; intermediate dates and the testing window remain open. Each milestone maps to WBS phases in [03-WBS.md](03-WBS.md) and done-criteria in [06-Acceptance-Criteria.md](06-Acceptance-Criteria.md).
 
-## Milestone M0 — Foundations locked
+## Milestone M0 — Foundations
 - WBS: Phase 0
 - Stack + all `[CONFIRM]` architecture decisions resolved and recorded in 07-Architecture.md.
 - Repo scaffolded, git + GitHub live, secrets pattern enforced.

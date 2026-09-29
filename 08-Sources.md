@@ -2,7 +2,7 @@
 
 Status: Draft — candidate set confirmed by owner; licensing review pending (Phase 1, WBS 1.2)
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 Ref: Architecture §1 (07), Risks Q1 (05)
@@ -59,7 +59,7 @@ Ref: Architecture §1 (07), Risks Q1 (05)
 
 ## Prioritization summary
 
-- **Candidate source pool (not an M1 integration commitment):** A1–A3, A6, A8, A10, B1–B3, B5, C1–C3, D2 → ~11 source classes + your compiled Excel for the longer-term roadmap; choose the synthesis pilot subset after discovery.
+- **Candidate source pool (not an M1 integration commitment):** A1–A3, A6, A8, A10, B1–B3, B5, C1–C3, and D2 cover research, legislative, legal, regulatory, and owner-curated material for the longer-term roadmap. D2 overlaps B2 operationally. Choose the much smaller synthesis pilot subset after discovery.
 - **After M1 (MVP-extend), only if time:** A4, A5, A7, A9, B4, D1, D3.
 - **Explicitly deferred (not in MVP):** B6 Open States (state coverage), full OA ecosystem breadth, enterprise legal-vetting workflows.
 
@@ -68,3 +68,12 @@ Ref: Architecture §1 (07), Risks Q1 (05)
 - Confirm per-source redistribution terms (what can be stored vs link-only) for: PMC, OpenAlex aggregates, Wiley SRU, CORE full text, CourtListener (EDU terms), Regulations.gov comments.
 - Default posture: **metadata + quote-level excerpts + links** everywhere; full-text storage only where license explicitly allows.
 - Rule (from 07 §1.1): link + attribution rendered with every citation; no full-text redistribution where disallowed.
+
+## Evidence eligibility — approved September 11, 2026
+
+Research synthesis admits two clearly labeled categories: peer-reviewed research and institutional research with documented methods, data provenance, limitations, and an identifiable review process. Offer a peer-reviewed-only filter. Assess eligibility per document, not merely by API or publisher name. Institutional review is distinct from external journal peer review. Both categories still require accessible full text and evidence-support checks. Government actions and actor statements are separate evidence for future tracers, not automatically research studies. See decision D024.
+
+
+## Indexed collection — approved September 11, 2026
+
+MVP searches an already prepared, versioned collection populated from selected APIs. Live discovery during user searches is deferred. Start with popular research topics and adjust topic coverage based on user interest. Show coverage and freshness; topic demand must not determine which findings or viewpoints are included. Initial topics, how demand is measured, refresh cadence, and expansion thresholds remain open (D025).

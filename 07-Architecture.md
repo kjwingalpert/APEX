@@ -1,8 +1,8 @@
 # APEX — Architecture (MVP v1, Detailed Technical Spec)
 
-Status: **M0 locked (2026-09-10)** — stack + core decisions confirmed; build-phase `[TBD]`s remain
+Status: **M0 architecture locked (2026-09-10); M0 implementation incomplete** — stack + core decisions confirmed; build-phase `[TBD]`s remain
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 Ref: PRD (01), WBS (03), Risks (05), Acceptance (06)
@@ -309,7 +309,7 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 | Date | Decision | Rationale | Status |
 |---|---|---|---|
 | 2026-09-01 | Documentation-first approach (PRD/WBS/Arch/Sources) | Plan before code — cheap to change now, expensive later | Done |
-| 2026-09-01 | **Q1:** source set = 13 MVP-core classes in 08-Sources.md | Coverage for all 3 capabilities with free/open APIs first; CourtListener's built-in citation checker directly supports the no-hallucination promise | Done (candidate set; licensing review pending in Phase 1) |
+| 2026-09-01 | **Q1:** candidate source registry recorded in 08-Sources.md | Coverage for all 3 capabilities with free/open APIs first; CourtListener's built-in citation checker directly supports the no-hallucination promise | Done (candidate pool only; pilot subset and licensing review pending in Phase 1) |
 | 2026-09-01 | Citations: claim → source span → URL, verification pass mandatory | The #1 differentiator vs generic AI (no fabricated refs); enforcement is in the pipeline, not the prompt | Done |
 
 ### 6.2 Confirmed at M0 (2026-09-10) — each with rationale; framework in §5.5
@@ -337,7 +337,7 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 
 ## 7. Decisions checklist (mirrors 05-Risks Q list)
 
-- [x] Q1 source list ✅ (13 MVP-core classes; see 08-Sources.md — licensing review pending in Phase 1)
+- [x] Q1 candidate source registry ✅ (see 08-Sources.md — pilot subset and licensing review pending in Phase 1)
 - [x] Q2 LLM + embedding providers ✅ (Anthropic Claude Sonnet/Haiku + Workers AI bge-m3; **concrete model IDs + key rotation pending**)
 - [ ] Q3 AI cost ceiling ✅ mechanism (AI Gateway spend limits: soft 80% / hard 100%) — **$100/month total approved; AI allocation/enforcement TBD**
 - [x] Q4 vector store ✅ (Cloudflare Vectorize)
@@ -347,3 +347,22 @@ Every decision below states its **rationale** — so the "why" is captured, not 
 - [ ] Q8 tester cohort
 - [x] Q9 shipping deadline November 3, 2026; testing window remains open
 - [ ] Q10 time-saved target metric
+
+## Keyword research workflow — confirmed September 10, 2026
+
+- Primary input is keywords. Return related documents and an overall synthesis of the included research; opening a document provides its own evidence-backed synthesis.
+- Both synthesis levels require claim-support checks and clickable supporting paragraphs. Show included documents, coverage, dates, and limitations rather than implying the results represent all research.
+- Abstract-only records can appear in results with clear access labels. Only accessible full text contributes to synthesis initially; insufficient coverage must be explicit. Do not fabricate a full-document synthesis for an abstract-only record.
+- Researchers can save papers to a private library and download papers where source permissions allow; otherwise link to the source access page. Synthesis export format and tester uploads remain open.
+- Stance Tracker remains a later capability: keyword searches identify people's and organizations' positions on an issue, supported by dated evidence. This is distinct from agreement/disagreement among scientific findings.
+- Decision/Action Tracer remains a later capability tracking policy, regulatory, and judicial developments. Reuse document identity, versioning, provenance, and source passages across future capabilities without building their extraction or UI now.
+
+
+## Indexed collection — approved September 11, 2026
+
+MVP searches an already prepared, versioned collection populated from selected APIs. Live discovery during user searches is deferred. Start with popular research topics and adjust topic coverage based on user interest. Show coverage and freshness; topic demand must not determine which findings or viewpoints are included. Initial topics, how demand is measured, refresh cadence, and expansion thresholds remain open (D025).
+
+
+## Results before synthesis — approved September 11, 2026
+
+Return and display document results as soon as search completes. Keep browsing available while synthesis runs with a separate progress indicator. Only display synthesis claims after verification; preserve search results if synthesis fails. See D026. Transport and background-job implementation remain design choices.

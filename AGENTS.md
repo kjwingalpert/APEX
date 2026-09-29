@@ -94,7 +94,7 @@ Query → retrieve (Vectorize hybrid) → inject spans as context
 ## Current status
 
 - [x] Planning docs drafted
-- [x] M0 locked (architecture decisions confirmed, 2026-09-10)
+- [x] M0 architecture decisions confirmed (2026-09-10); M0 implementation remains incomplete
 - [x] Git repo initialized + synced to GitHub
 - [ ] WBS 0.3: repo scaffolding (pnpm workspace, wrangler config, lint/format, CI)
 - [ ] WBS 0.4: secrets setup + R10 key rotation

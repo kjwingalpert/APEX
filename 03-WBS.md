@@ -2,7 +2,7 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
@@ -77,7 +77,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 
 | # | Task | Owner | Est. | Dependencies |
 |---|---|---|---|---|
-| 7.1 | Recruit tester cohort (non-profit researchers, advocacy groups) | Kaia | parallel | outreach by September 24 |
+| 7.1 | Confirm the first workflow with the Aging & Cognition Research Group at the USC Schaeffer Institute; recruit nonprofit/advocacy testers later to validate the primary market | Kaia | parallel | first validation user identified September 29; contact, task, and session date TBD |
 | 7.2 | Light-touch sign-in for testers (free access; modular auth wrapper) | Kaia | 1.5d | 4.1 |
 | 7.3 | Session guidance: real prep tasks (lobbying, testimony, coalitions) + time-saved survey | Kaia | 1d | 7.1, 7.2 |
 | 7.4 | Usage analytics for time-saved baseline (task timers, task completion) | Kaia | 2d | 4.1 |
@@ -90,7 +90,7 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 | 8.1 | QA against acceptance criteria (06) incl. citation-integrity pass | Kaia | 2d | synthesis release phases; excludes deferred 5–6 |
 | 8.2 | Data cleanup, seed corpus refresh, secrets review | Kaia | 0.5d | 8.1 |
 | 8.3 | Deploy + free-tier hosting check (`[CONFIRM]` provider) | Kaia | 1d | 8.1 |
-| 8.4 | Tester launch + metrics dashboard live | Kaai | 0.5d | 8.3 |
+| 8.4 | Tester launch + metrics dashboard live | Kaia | 0.5d | 8.3 |
 
 **Historical estimate, superseded for release planning:** ~46–68d effort for the full roadmap, not a commitment for synthesis-first MVP. A revised hour-based build plan is still required. Re-baseline after Cloudflare stack lock (2026-09-10): infra-adjacent tasks (0.3–0.5, 2.4, 8.3) shrink; AI/citation core (Phase 3) unchanged.
 

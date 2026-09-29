@@ -2,7 +2,7 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 Current release baseline (2026-09-10): synthesis over a curated corpus first; Stance Tracker and Action Tracer are deferred. Shipping target November 3, 2026, subject to evidence quality; owner availability 10 hours/week; total operating allowance $100/month. See [decision log](docs/decisions/README.md).
 
@@ -67,3 +67,14 @@ Per-phase "done" definitions, including the non-negotiable guardrails. A phase i
 - [ ] Free access path for cohort works end-to-end.
 - [ ] New AI requests stop at the allocated budget limit; existing research remains accessible.
 - [ ] Domain review finds no material unsupported claims in the release sample; sample design and numeric useful-answer thresholds remain open. Reduce coverage or delay access if quality fails.
+
+## Keyword workflow acceptance additions
+
+- [ ] Keyword search returns related documents with access labels and an overall synthesis whose included full-text sources are visible.
+- [ ] Opening a full-text document provides a document-specific synthesis with clickable supporting paragraphs.
+- [ ] Abstract-only records are excluded from both synthesis paths and clearly explain the access limitation.
+- [ ] Saved papers remain private to their owner; downloads respect source permissions, with source links when downloads are unavailable.
+
+- [ ] MVP keyword searches use the prepared index; coverage and freshness are visible, and searches without adequate evidence do not imply that research is absent. Live discovery is deferred (D025).
+
+- [ ] Document results become usable before synthesis completes; synthesis progress is separate, unchecked claims remain hidden, and synthesis failures preserve search results (D026).

@@ -2,7 +2,7 @@
 
 Status: Draft
 Owner: [Kaia]
-Last updated: 2026-09-10
+Last updated: 2026-09-29
 
 ## Top Risks
 
@@ -18,6 +18,7 @@ Last updated: 2026-09-10
 | R8 | **Stance/precedent data not trustworthy enough for real strategy work** | Medium | High | Scope test issues narrowly; show evidence + dates; label confidence/coverage limits in UI |
 | R9 | **Scope creep (all 3 features want depth)** | Medium | Medium | 02-MVP-Scope deferral list governs; anything beyond v1 definitions goes to list |
 | R10 | **Shared API keys discovered/leaked via chat, screenshots, commits** | Medium | High | One production key was pasted this session — rotate it; keys live only in `.env`; `wrangler secret put`/Workers secrets; CI secret-scan; never paste live keys into chats or docs (Guardrail 2) |
+| R11 | **USC IT approval delays access to Cloudflare Workers and remote bindings** | High | Medium | Continue local development with Wrangler/workerd, local D1, and local R2. Keep retrieval and generation behind interfaces so local substitutes can stand in for remote-only Vectorize and Workers AI. Defer deployment, remote-binding integration, and platform-specific verification until access is granted. This local-first mitigation is approved in D028. |
 
 ## Assumptions
 
@@ -32,14 +33,14 @@ Last updated: 2026-09-10
 
 | # | Question | Default waiting on |
 |---|---|---|
-| Q1 | ~~Exact source list?~~ ✅ **Resolved** — 13 MVP-core classes confirmed; see [08-Sources.md](08-Sources.md). Licensing/redistribution review is WBS Phase 1 (1.2). | Done |
+| Q1 | ~~Candidate source registry?~~ ✅ **Resolved** — the candidate pool is recorded in [08-Sources.md](08-Sources.md). The synthesis pilot subset and licensing/redistribution review remain WBS Phase 1 work. | Done |
 | Q2 | ~~LLM providers + embedding provider?~~ ✅ **Resolved (2026-09-10)** — Anthropic Claude: Sonnet-class for synthesis, Haiku-class for extraction; embeddings = Workers AI `bge-m3`. Concrete model IDs/key rotation pending (owner). | Done |
 | Q3 | ~~Monthly AI cost ceiling?~~ ✅ **Mechanism resolved (2026-09-10)** — Cloudflare AI Gateway spend limits: soft alert 80%, hard block 100%. **Owner approved $100/month total pilot operating allowance (2026-09-10).** AI-only allocation and enforcement configuration remain TBD. | Partial |
 | Q4 | ~~Vector store?~~ ✅ **Resolved** — Cloudflare Vectorize (GA). | Done |
 | Q5 | ~~Deploy/hosting provider?~~ ✅ **Resolved** — Cloudflare (Workers + Pages, D1, Vectorize, R2, Workers AI, AI Gateway). | Done |
 | Q6 | ~~Backend framework?~~ ✅ **Resolved** — Hono + TypeScript on Cloudflare Workers. | Done |
 | Q7 | ~~Frontend + charting?~~ ✅ **Resolved** — Vite + React + Tailwind + shadcn/ui + React Query + Recharts. | Done |
-| Q8 | First pilot organization/contact in Los Angeles, policy issue, cohort size, and sign-up channel? Owner needs to speak with a prospective organization first. | Open — owner outreach by September 24, 2026; grilling Q6 |
+| Q8 | First validation user is the Aging & Cognition Research Group at the USC Leonard D. Schaeffer Institute for Public Policy & Government Service. The contact is one of its lead researchers. What real research task will they test, who is the named contact, when will the session occur, and how many participants will join? | Partial — first user and contact role identified September 29, 2026; named contact, workflow discovery, and scheduling remain open |
 | Q9 | Shipping deadline: **November 3, 2026**, independent of an election-related workflow. Pilot start and testing window remain open. | Deadline resolved; testing window TBD |
 | Q10 | Repeat use for real research tasks; weekly use is acceptable when research is not daily. Cohort, observation window, retention threshold, and time-saved target remain TBD. | Direction resolved; numeric criteria open |
 | Q11 | First research task and output: question answer, literature summary, cited brief, or another deliverable? Resolve with the pilot organization before fixing corpus and workflow scope. | Open — owner discovery; grilling Q7 |
@@ -47,9 +48,10 @@ Last updated: 2026-09-10
 ## Remaining discovery questions
 
 - Tester document uploads versus owner-managed ingestion remain open (grilling Q19).
-- Export format and whether copyable cited text is sufficient remain open (grilling Q20).
+- Synthesis export format and whether copyable cited text is sufficient remain open (grilling Q20). Paper saving and permitted paper downloads are now requested MVP behavior; these are separate from synthesis export.
 - Numeric useful-answer-rate thresholds are deferred; the proposed 16/20 threshold was not adopted (grilling Q22).
 - Usage tracking is requested for planning: sign-ins, research requests, repeat use, citation clicks, feedback, and estimated AI cost. Proposed analytics omit private question/answer text; retention and implementation remain to be decided.
+- USC IT approval for Cloudflare Workers access is pending. Local Worker execution, D1, and R2 development can proceed; Vectorize and Workers AI require remote bindings and remain unavailable until access is granted.
 
 ## Owner decisions — grilling session, 2026-09-10
 
@@ -60,7 +62,7 @@ Last updated: 2026-09-10
 - Owner availability: **10 hours per week**, approximately **77 hours** from September 10 to November 3. Allocate time for outreach, evidence review, and feedback as well as development.
 - November 3 is a shipping deadline, not a requirement to support an election-specific task.
 - When evidence is insufficient, return supported partial findings and explicitly identify evidence gaps; do not fill gaps with unsupported claims.
-- Owner will speak with a potential pilot organization within the next two weeks, by September 24, 2026.
+- The Aging & Cognition Research Group at the USC Schaeffer Institute was identified on September 29, 2026 as the first validation user. Contact, research task, participants, and session timing remain to be confirmed. A later nonprofit or advocacy tester is still needed to validate the primary customer segment.
 - First release answers from a curated collection with visible coverage and dates. Live-web discovery is deferred.
 - Synthesis must present credible conflicting evidence and relevant limitations, including findings that weaken the user's preferred argument.
 - Tester questions and saved research are private by default; public source documents may be shared. A single shared organization must not expose individual research to other testers.
@@ -78,3 +80,10 @@ Last updated: 2026-09-10
 ## Risk reviews
 
 Next formal review: after Phase 1 (M1). Update R1/R2/R3 with real source + cost data.
+
+## Topic coverage follow-up — September 11, 2026
+
+- Indexed search is approved for the MVP; live discovery is deferred (D025).
+- Choose initial popular topics using evidence of target researchers' needs. The topic list and definition of popularity remain open.
+- Define a privacy-preserving way to measure topic interest, plus refresh cadence and expansion criteria. Raw private research text must not become public analytics.
+- Coverage risk: demand-driven topic selection can omit important areas. Disclose coverage gaps and apply consistent evidence standards within each topic; never rank conclusions by popularity.
