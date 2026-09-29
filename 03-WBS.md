@@ -14,8 +14,8 @@ Legend: `[P-Phase]` tasks are scoped interdependently within that phase. Estimat
 |---|---|---|---|---|
 | 0.1 | ~~Confirm MVP tech stack~~ ✅ **DONE (2026-09-10)** — locked: Hono/TS Workers API; Vite + React frontend; D1 + Vectorize + R2; Workers AI (bge-m3) + Anthropic Claude; AI Gateway spend limits; hosting = Cloudflare (see 07-Architecture §6.2) | Kaia | 1d | — |
 | 0.2 | Init git repo + GitHub; branch strategy (main + feature) | Kaia | 0.5d | 0.1 |
-| 0.3 | Repo scaffolding: pnpm workspace (`apps/web`, `apps/api`, `packages/`, `pipeline/`), lint/format, wrangler config, CI basics | Kaia | 1d | 0.2 |
-| 0.4 | Secrets setup (`.env.example`, `wrangler secret put` pattern, guard rails; **rotate leaked prod key per R10**; verify nothing committed) | Kaia | 0.5d | 0.3 |
+| 0.3 | Repo scaffolding: pnpm workspace (`apps/web`, `apps/api`, `packages/`, `pipeline/`), lint/format, wrangler config, CI basics; after the first TypeScript and Python code lands, enable CodeQL default setup for both languages with the extended security suite | Kaia | 1d | 0.2 |
+| 0.4 | Secrets and dependency security setup (`.env.example`, `wrangler secret put` pattern, GitHub secret scanning/push protection, Dependabot alerts and conservative updates; **rotate leaked prod key per R10**; verify nothing committed) | Kaia | 0.5d | 0.3 |
 | 0.5 | Tenant-scoping convention documented + schema template (all user tables carry `user_id`/`org_id`) | Kaia | 0.5d | 0.1 |
 
 ## Phase 1 — Data & Access Layer (Estimates: 4–6d)

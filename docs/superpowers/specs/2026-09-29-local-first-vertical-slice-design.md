@@ -221,6 +221,14 @@ The application must refuse to start with development authentication enabled out
 - API tests prove results survive synthesis failure and private-record misses do not reveal existence.
 - A browser-level smoke test covers search, results, verified citation expansion, and an explicit evidence-gap case.
 
+## Repository security automation
+
+After the first TypeScript and Python application code is committed, enable GitHub CodeQL default setup for `javascript-typescript` and `python` with the `security-extended` query suite. Default setup scans pushes to the default or protected branches, pull requests targeting those branches, and a weekly schedule without requiring the repository to maintain an advanced workflow file.
+
+Review CodeQL file coverage after the first successful scan. Add `.github/codeql-config.yml` or move to an advanced `.github/workflows/codeql.yml` workflow only if default setup omits relevant source paths or later requires custom build, schedule, query, or runner behavior.
+
+CodeQL does not satisfy the repository's secret-scanning requirement and does not replace application tests. Configure GitHub secret scanning and push protection separately. Enable Dependabot alerts and conservative dependency updates separately. Tenant isolation, citation integrity, claim support, source licensing, and runtime behavior remain explicit application and review responsibilities.
+
 ## Local and remote configuration
 
 The repository pins Wrangler as a development dependency and uses `wrangler dev --local` for account-independent work. Local D1 and R2 state lives under `.wrangler/state` and is ignored by Git. Configuration contains placeholder resource names and no production identifiers or secrets.
@@ -236,7 +244,7 @@ After USC IT approval:
 
 ## Delivery order
 
-1. Workspace, commands, and continuous integration.
+1. Workspace, commands, continuous integration, and repository security automation after source code lands.
 2. Shared contracts and development authentication boundary.
 3. D1 schema, migrations, and tenant-scoped repositories.
 4. Fixture manifest, local R2 storage, and ingestion pipeline.

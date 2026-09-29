@@ -118,3 +118,10 @@ Build the first complete APEX evidence path locally with Wrangler/workerd, local
 Design: `docs/superpowers/specs/2026-09-29-local-first-vertical-slice-design.md`.
 
 Affected documents: Architecture design, Risks, WBS, decision log.
+
+
+### D029 — Start with GitHub CodeQL default setup (approved)
+
+After the first TypeScript and Python application code is committed, enable CodeQL default setup for both `javascript-typescript` and `python` using the `security-extended` query suite. Review coverage after the first successful scan and adopt a repository-owned advanced workflow only if default setup lacks needed path, query, build, schedule, or runner control. Configure GitHub secret scanning and push protection separately because CodeQL does not detect committed credentials, and use Dependabot separately for dependency vulnerabilities and updates. This keeps initial security scanning current and low-maintenance while preserving a path to explicit workflow configuration when the monorepo provides evidence that it is needed.
+
+Affected documents: WBS, local-first vertical-slice design, decision log.
